@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Members - Dynamis Currency Split</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .manage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(240,188,46,0.08) 0%, rgba(78,127,255,0.04) 100%);
+  }
+  .manage-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .logout-btn {
+    background: rgba(200,64,64,0.15);
+    border: 1px solid rgba(200,64,64,0.4);
+    border-radius: 6px;
+    color: var(--red);
+    font-family: var(--font);
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover {
+    background: rgba(200,64,64,0.3);
+    border-color: rgba(200,64,64,0.6);
+  }
+
+  .manage-container {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold-dim), transparent);
+  }
+
+  .member-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .member-name {
+    color: var(--text-bright);
+    font-weight: 500;
+  }
+
+  .member-remove {
+    background: none;
+    border: none;
+    color: var(--red);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .member-remove:hover {
+    opacity: 1;
+  }
+
+  .add-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .add-form input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-bright);
+    font-family: var(--font);
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .add-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(78,127,255,0.15);
+  }
+
+  .add-form button {
+    background: rgba(78,127,255,0.18);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: #7aacff;
+    font-family: var(--font);
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .add-form button:hover {
+    background: rgba(78,127,255,0.34);
+    color: #fff;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    margin: 16px 20px 0;
+    transition: color 0.2s;
+  }
+
+  .back-btn:hover {
+    color: var(--accent);
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+  }
+
+  .error {
+    background: rgba(200,64,64,0.1);
+    border: 1px solid rgba(200,64,64,0.3);
+    border-radius: 6px;
+    color: var(--red);
+    padding: 16px;
+    margin: 20px;
+  }
+
+  .success {
+    background: rgba(46,204,128,0.1);
+    border: 1px solid rgba(46,204,128,0.3);
+    border-radius: 6px;
+    color: var(--green);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="manage-header">
+  <div class="manage-title">⚙️ Manage Default Members</div>
+  <button class="logout-btn" onclick="handleLogout()">Logout</button>
+</div>
+
+<div class="manage-container" id="manage-container">
+  <div class="loading">Loading members...</div>
+</div>
+
+<a href="index.html" class="back-btn">← Back to Calculator</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script src="db.js"></script>
+<script>
+  async function loadManagePage() {
+    const container = document.getElementById('manage-container');
+    
+    // Check if logged in
+    if (!isLoggedIn()) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    try {
+      // Load default members
+      const members = await getDefaultMembers();
+
+      // Build HTML
+      let html = `
+        <div class="success" id="success-msg"></div>
+        <div class="card">
+          <div class="card-title">Members List</div>
+          <div class="member-list" id="member-list">
+      `;
+
+      if (members.length === 0) {
+        html += '<div style="color: var(--text-dim); padding: 20px; text-align: center;">No members yet</div>';
+      } else {
+        members.forEach(m => {
+          html += `
+            <div class="member-item">
+              <div class="member-name">${m.name}</div>
+              <button class="member-remove" onclick="removeMember('${m.id}')" title="Remove">✕</button>
+            </div>
+          `;
+        });
+      }
+
+      html += `
+          </div>
+          <div class="add-form">
+            <input type="text" id="new-member-name" placeholder="Player name">
+            <button onclick="addMember()">Add Member</button>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    } catch (error) {
+      console.error('Error:', error);
+      container.innerHTML = '<div class="error">Error loading members</div>';
+    }
+  }
+
+  async function addMember() {
+    const nameInput = document.getElementById('new-member-name');
+    const name = nameInput.value.trim();
+
+    if (!name) {
+      alert('Please enter a player name');
+      return;
+    }
+
+    const result = await addDefaultMember(name);
+    if (result.success) {
+      nameInput.value = '';
+      showSuccess('Member added!');
+      loadManagePage();
+    } else {
+      alert('Error: ' + result.error);
+    }
+  }
+
+  async function removeMember(memberId) {
+    if (!confirm('Remove this member?')) return;
+
+    const result = await deleteDefaultMember(memberId);
+    if (result.success) {
+      showSuccess('Member removed!');
+      loadManagePage();
+    } else {
+      alert('Error: ' + result.error);
+    }
+  }
+
+  function showSuccess(msg) {
+    const el = document.getElementById('success-msg');
+    el.textContent = '✓ ' + msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 2500);
+  }
+
+  function handleLogout() {
+    logout();
+    window.location.href = 'login.html';
+  }
+
+  // Load on page load
+  loadManagePage();
+</script>
+
+</body>
+</html>

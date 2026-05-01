@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -15,6 +16,10 @@
   <div class="header-text">
     <h1>Dynamis Currency Split</h1>
     <p>It's Fiiiine — created by Xavierre</p>
+  </div>
+  <div class="header-buttons">
+    <a href="dashboard.html" class="header-btn" title="View analytics and history">📊 Analytics</a>
+    <a href="manage.html" class="header-btn" title="Edit default members">⚙️ Manage</a>
   </div>
 </header>
 
@@ -46,8 +51,20 @@
 
     <div class="card">
       <div class="card-title">Players</div>
-      <div class="player-list" id="player-list"></div>
-      <button class="add-player-btn" onclick="addPlayer()">＋ Add Player</button>
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;font-size:0.75rem;color:var(--text-dim);">
+        <span>📋 <span id="ls-name-display">Linkshell</span></span>
+        <a href="ls-manage.html" style="color:var(--accent);text-decoration:none;">Edit Members</a>
+      </div>
+      
+      <!-- Default members checkboxes -->
+      <div class="member-checkboxes" id="member-checkboxes" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:5px;padding:8px;background:rgba(0,0,0,0.2);"></div>
+
+      <!-- Guest players -->
+      <div style="margin-bottom:12px;">
+        <label style="font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.03em;display:block;margin-bottom:6px;">Guest Players</label>
+        <div id="guest-players" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button class="add-player-btn" onclick="addGuestPlayer()" style="margin-top:6px;">＋ Add Guest</button>
+      </div>
     </div>
 
   </div>
@@ -135,6 +152,8 @@
 })();
 
 </script>
+<script src="auth.js"></script>
+<script src="db.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

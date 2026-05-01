@@ -88,12 +88,94 @@ const BADGE_LABELS = { byne: 'One-Byne', silver: 'Bronzepiece', shell: 'Whiteshe
 
 let currentSection = 'original';
 let currentZoneId = ZONES.original[0].id;
-let players = ['Player 1', 'Player 2', 'Player 3'];
+let players = []; // Will be filled with selected default members + guests
 let relicSales = [];
 let lotteryPools = [];
+let defaultMembers = []; // From LS database
+let selectedMembers = new Set(); // Default members selected for this run
+let guestPlayers = []; // Guest players added for this run
 
-function init() {
-  renderInstanceBar(); renderPlayers(); renderCurrencyGrid(); updateFeeBreakdown(); renderHistory();
+// ============ LS MEMBER MANAGEMENT ============
+// ============ MEMBERS MANAGEMENT ============
+async function loadDefaultMembers() {
+  try {
+    defaultMembers = await getDefaultMembers();
+    renderMemberCheckboxes();
+  } catch (e) {
+    console.error('Error loading members:', e);
+    // Fallback: show empty list
+    defaultMembers = [];
+    renderMemberCheckboxes();
+  }
+}
+
+function renderMemberCheckboxes() {
+  const container = document.getElementById('members-grid');
+  if (!container) return;
+  
+  container.innerHTML = defaultMembers.map(m => `
+    <label class="member-checkbox">
+      <input type="checkbox" onchange="toggleMember('${m.name}', this.checked)">
+      <span class="member-name">${m.name}</span>
+    </label>
+  `).join('');
+}
+
+function toggleMember(memberName, isSelected) {
+  if (isSelected) {
+    selectedMembers.add(memberName);
+  } else {
+    selectedMembers.delete(memberName);
+  }
+  updatePlayersList();
+}
+
+function renderGuestPlayers() {
+  const container = document.getElementById('guests-list');
+  if (!container) return;
+  
+  container.innerHTML = guestPlayers.map((guest, i) => `
+    <div class="guest-item">
+      <input type="text" class="guest-input" value="${guest}" 
+             onchange="guestPlayers[${i}] = this.value; updatePlayersList();"
+             placeholder="Player name">
+      <button class="guest-remove-btn" onclick="removeGuestPlayer(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function addGuest() {
+  guestPlayers.push('');
+  renderGuestPlayers();
+  updatePlayersList();
+}
+
+function removeGuestPlayer(i) {
+  guestPlayers.splice(i, 1);
+  renderGuestPlayers();
+  updatePlayersList();
+}
+
+function updatePlayersList() {
+  // Combine selected default members + non-empty guests
+  const validGuests = guestPlayers.filter(g => g.trim());
+  players = [...selectedMembers, ...validGuests];
+  updateSummary();
+  updateFeeBreakdown();
+}
+
+function updateSummary() {
+  const defaultCount = selectedMembers.size;
+  const guestCount = guestPlayers.filter(g => g.trim()).length;
+  const totalCount = defaultCount + guestCount;
+
+  const defaultEl = document.getElementById('default-count');
+  const guestEl = document.getElementById('guest-count');
+  const totalEl = document.getElementById('total-count');
+
+  if (defaultEl) defaultEl.textContent = defaultCount;
+  if (guestEl) guestEl.textContent = guestCount;
+  if (totalEl) totalEl.textContent = totalCount;
 }
 
 // === SECTIONS ===
@@ -120,16 +202,8 @@ function renderInstanceBar() {
 }
 
 // === PLAYERS ===
-function renderPlayers() {
-  document.getElementById('player-list').innerHTML = players.map((p,i) =>
-    `<div class="player-item">
-      <input type="text" value="${p}" onchange="players[${i}]=this.value;updateFeeBreakdown();" placeholder="Player name">
-      <button class="player-remove" onclick="removePlayer(${i})">✕</button>
-    </div>`).join('');
-  updateFeeBreakdown();
-}
-function addPlayer() { players.push('Player '+(players.length+1)); renderPlayers(); }
-function removePlayer(i) { players.splice(i,1); renderPlayers(); }
+// renderPlayers is now handled by renderMemberCheckboxes and renderGuestPlayers
+// Keeping compatibility for other code
 
 // === RELIC SALES ===
 function addRelicSale() {
@@ -583,11 +657,34 @@ function saveHistory(history) {
 
 function saveRun() {
   if (!lastRunData) { alert('Calculate a distribution first.'); return; }
+  
+  // Save to localStorage (always works)
   const history = loadHistory();
   history.unshift({ ...lastRunData, id: Date.now() });
-  if (history.length > 50) history.splice(50); // cap at 50 runs
+  if (history.length > 50) history.splice(50);
   saveHistory(history);
   renderHistory();
+  
+  // Also try to save to Supabase
+  if (isLoggedIn()) {
+    const runData = {
+      zoneName: lastRunData.zoneName,
+      date: lastRunData.date,
+      defaultMembers: Array.from(selectedMembers),
+      guestPlayers: guestPlayers.filter(g => g.trim()),
+      feeEach: lastRunData.feeEach,
+      cData: lastRunData.cData,
+      lotteryResults: lastRunData.lotteryResults
+    };
+
+    // Call from db.js
+    saveDynamisRun(runData).then(result => {
+      if (result) {
+        console.log('Run also saved to database');
+      }
+    });
+  }
+
   const btn = event.target;
   const orig = btn.textContent;
   btn.textContent = '✓ Saved!';
