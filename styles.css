@@ -296,16 +296,23 @@
   }
 
   .players-panel {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 14px;
     margin-bottom: 12px;
   }
 
-  .players-column {
+  .players-section {
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+
+  .guest-panel {
+    border: 1px solid rgba(46,204,128,0.4);
+    background: rgba(46,204,128,0.08);
+    border-radius: 8px;
+    padding: 14px;
   }
 
   .section-label {
@@ -323,9 +330,9 @@
   }
 
   .players-summary {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -342,7 +349,7 @@
   }
 
   .players-summary .summary-item strong {
-    color: var(--text-bright);
+    color: var(--gold);
   }
 
   .member-checkbox {
