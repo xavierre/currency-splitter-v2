@@ -236,7 +236,6 @@ function relicTotal() { return relicSales.reduce((s,v)=>s+v,0); }
 function renderRelicSales() {
   document.getElementById('relic-items').innerHTML = relicSales.map((v,i) =>
     `<div class="relic-item">
-      <div>${v.toLocaleString()} gil</div>
       <div style="display:flex;align-items:center;gap:6px;">
         <span>${v.toLocaleString()} gil</span>
         <button class="player-remove" onclick="removeRelicSale(${i})">✕</button>

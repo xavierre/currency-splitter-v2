@@ -564,7 +564,7 @@
   .sep { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 4px 0; }
 
   /* RELIC */
-  .relic-row { display: flex; flex-direction: column; gap: 0px; align-items: stretch; }
+  .relic-row { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
   .relic-row input { flex: 1; }
   .relic-add-btn { background: rgba(78,127,255,0.18); border: 1px solid var(--accent); border-radius: 5px; color: #7aacff; font-family: var(--font); font-size: 0.76rem; font-weight: 600; padding: 7px 12px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
   .relic-add-btn:hover { background: rgba(78,127,255,0.34); color: #fff; }
