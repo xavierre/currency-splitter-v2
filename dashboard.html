@@ -37,27 +37,27 @@
     background: rgba(200,64,64,0.3);
     border-color: rgba(200,64,64,0.6);
   }
-
+ 
   .dashboard-container {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 20px;
     padding: 20px;
   }
-
+ 
   .stats-panel {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
-
+ 
   .stat-card {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 16px;
   }
-
+ 
   .stat-label {
     font-size: 0.72rem;
     font-weight: 700;
@@ -66,7 +66,7 @@
     color: var(--text-dim);
     margin-bottom: 8px;
   }
-
+ 
   .stat-value {
     font-family: var(--mono);
     font-size: 1.8rem;
@@ -74,19 +74,19 @@
     color: var(--gold-light);
     text-shadow: 0 0 16px rgba(255,224,102,0.3);
   }
-
+ 
   .stat-subtext {
     font-size: 0.8rem;
     color: var(--text-dim);
     margin-top: 4px;
   }
-
+ 
   .history-section {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
-
+ 
   .history-title {
     font-size: 0.8rem;
     font-weight: 700;
@@ -94,7 +94,7 @@
     text-transform: uppercase;
     color: var(--gold);
   }
-
+ 
   .history-list {
     display: flex;
     flex-direction: column;
@@ -102,7 +102,7 @@
     max-height: 600px;
     overflow-y: auto;
   }
-
+ 
   .history-item {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -111,30 +111,48 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-
+ 
   .history-item:hover {
     border-color: var(--accent);
     background: rgba(78,127,255,0.08);
   }
-
+ 
+  .history-expand {
+    background: rgba(78,127,255,0.04);
+    padding: 10px;
+    border-radius: 4px;
+    animation: slideDown 0.2s ease-out;
+  }
+ 
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 500px;
+    }
+  }
+ 
   .history-item-title {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-bright);
   }
-
+ 
   .history-item-meta {
     font-size: 0.78rem;
     color: var(--text-dim);
     margin-top: 4px;
   }
-
+ 
   .loading {
     text-align: center;
     padding: 40px 20px;
     color: var(--text-dim);
   }
-
+ 
   .error {
     background: rgba(200,64,64,0.1);
     border: 1px solid rgba(200,64,64,0.3);
@@ -143,7 +161,7 @@
     padding: 16px;
     margin: 20px;
   }
-
+ 
   .back-btn {
     display: inline-flex;
     align-items: center;
@@ -154,11 +172,11 @@
     margin: 16px 20px 0;
     transition: color 0.2s;
   }
-
+ 
   .back-btn:hover {
     color: var(--accent);
   }
-
+ 
   @media (max-width: 900px) {
     .dashboard-container {
       grid-template-columns: 1fr;
@@ -167,18 +185,18 @@
 </style>
 </head>
 <body>
-
+ 
 <div class="dashboard-header">
   <div class="dashboard-title">📊 Analytics Dashboard</div>
   <button class="logout-btn" onclick="handleLogout()">Logout</button>
 </div>
-
+ 
 <div class="dashboard-container" id="dashboard-container">
   <div class="loading">Loading analytics...</div>
 </div>
-
+ 
 <a href="index.html" class="back-btn">← Back to Calculator</a>
-
+ 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script src="db.js"></script>
@@ -191,24 +209,24 @@
       window.location.href = 'login.html';
       return;
     }
-
+ 
     try {
       // Load analytics and runs
       const [stats, runs] = await Promise.all([
         getAnalytics(),
         getRunHistory()
       ]);
-
+ 
       if (!stats) {
         container.innerHTML = '<div class="error">Error loading analytics. Please try again.</div>';
         return;
       }
-
+ 
       // Find most active player
       const topPlayer = Object.entries(stats.playerFrequency).length > 0
         ? Object.entries(stats.playerFrequency).sort((a, b) => b[1] - a[1])[0]
         : null;
-
+ 
       // Find avg currency
       const avgCurrency = Object.values(stats.currencyByType).length > 0
         ? Math.round(
@@ -216,7 +234,7 @@
             Object.keys(stats.currencyByType).length
           )
         : 0;
-
+ 
       // Build stats panel
       const statsHtml = `
         <div class="stats-panel">
@@ -224,25 +242,25 @@
             <div class="stat-label">Total Runs</div>
             <div class="stat-value">${stats.totalRuns}</div>
           </div>
-
+ 
           <div class="stat-card">
             <div class="stat-label">Total Sales Income</div>
             <div class="stat-value">${(stats.totalSales || 0).toLocaleString()}</div>
             <div class="stat-subtext">gil from relic drops</div>
           </div>
-
+ 
           <div class="stat-card">
             <div class="stat-label">Avg Entry Fee</div>
             <div class="stat-value">${(stats.avgFeePerPlayer || 0).toLocaleString()}</div>
             <div class="stat-subtext">per player per run</div>
           </div>
-
+ 
           <div class="stat-card">
             <div class="stat-label">Most Active Player</div>
             <div class="stat-value">${topPlayer ? topPlayer[0] : 'N/A'}</div>
             <div class="stat-subtext">${topPlayer ? topPlayer[1] + ' runs' : ''}</div>
           </div>
-
+ 
           <div class="stat-card">
             <div class="stat-label">Avg Currency</div>
             <div class="stat-value">${avgCurrency}</div>
@@ -250,7 +268,7 @@
           </div>
         </div>
       `;
-
+ 
       // Build history section
       let historyHtml = '<div class="history-section"><div class="history-title">Recent Runs</div><div class="history-list">';
       
@@ -271,35 +289,59 @@
             ...(run.guest_players || [])
           ].join(', ');
           
+          const runId = `run-${run.id}`;
+          const currencyHtml = (run.currency_data || []).map(c => 
+            `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--text-dim);">${c.name}:</span> ${c.perP || 0} per player</div>`
+          ).join('');
+          const lotteryHtml = (run.lotteryResults || []).map(lr =>
+            `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--gold);">${lr.name}:</span> ${(lr.wins || []).join(', ') || 'nothing'}</div>`
+          ).join('');
+          
           historyHtml += `
-            <div class="history-item">
+            <div class="history-item" onclick="toggleRunExpand('${runId}')">
               <div class="history-item-title">${run.zone_name}</div>
               <div class="history-item-meta">${date} · ${totalPlayers} players · Fee: ${(run.entry_fee_per_player || 0).toLocaleString()} gil</div>
               <div class="history-item-meta" style="margin-top:6px;color:var(--text-dim);font-size:0.73rem;">${playerNames}</div>
+              
+              <div id="${runId}-expand" class="history-expand" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Currency Distribution:</div>
+                ${currencyHtml || '<div style="color:var(--text-dim);">No currency data</div>'}
+                
+                <div style="font-size:0.8rem;color:var(--text-dim);margin:12px 0 8px 0;font-weight:600;">Lottery Results:</div>
+                ${lotteryHtml || '<div style="color:var(--text-dim);">No results</div>'}
+              </div>
             </div>
           `;
         });
       }
-
+ 
       historyHtml += '</div></div>';
-
+ 
       // Combine and render
       container.innerHTML = statsHtml + historyHtml;
-
+ 
     } catch (error) {
       console.error('Error:', error);
       container.innerHTML = '<div class="error">An error occurred while loading analytics.</div>';
     }
   }
-
+ 
   function handleLogout() {
     logout();
     window.location.href = 'login.html';
   }
-
+ 
+  function toggleRunExpand(runId) {
+    const expandEl = document.getElementById(runId + '-expand');
+    if (expandEl) {
+      expandEl.style.display = expandEl.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+ 
   // Load on page load
-  loadDashboard();
+  // Wait for scripts to load, then load page
+  window.addEventListener('load', loadDashboard);
 </script>
-
+ 
 </body>
 </html>
