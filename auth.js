@@ -2,7 +2,7 @@
 const SUPABASE_URL = 'https://tqukwfotmokeivzlhmsy.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_SrpGLdaA-3Q-MwYdaqo6wg_qKlBNwgN';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============ AUTH FUNCTIONS ============
 async function signup(username, password) {
@@ -11,7 +11,7 @@ async function signup(username, password) {
     const passwordHash = await hashPassword(password);
 
     // Insert user
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('users')
       .insert([{ username, password_hash: passwordHash }])
       .select();
@@ -41,7 +41,7 @@ async function login(username, password) {
     const passwordHash = await hashPassword(password);
 
     // Find user
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('users')
       .select('*')
       .eq('username', username)

@@ -8,7 +8,7 @@ async function saveDynamisRun(runData) {
       return null;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('runs')
       .insert([{
         date: new Date().toISOString(),
@@ -40,7 +40,7 @@ async function getRunHistory(limit = 100) {
     const user = getCurrentUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('runs')
       .select('*')
       .order('date', { ascending: false })
@@ -61,7 +61,7 @@ async function getAnalytics() {
     const user = getCurrentUser();
     if (!user) return null;
 
-    const { data: runs, error } = await supabase
+    const { data: runs, error } = await supabaseClient
       .from('runs')
       .select('*');
 
@@ -138,7 +138,7 @@ async function getAnalytics() {
 
 async function getDefaultMembers() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('default_members')
       .select('*')
       .order('name', { ascending: true });
@@ -156,7 +156,7 @@ async function addDefaultMember(name) {
     const user = getCurrentUser();
     if (!user) return { success: false, error: 'Not logged in' };
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('default_members')
       .insert([{ name }])
       .select();
@@ -180,7 +180,7 @@ async function deleteDefaultMember(memberId) {
     const user = getCurrentUser();
     if (!user) return { success: false, error: 'Not logged in' };
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('default_members')
       .delete()
       .eq('id', memberId);
@@ -197,7 +197,7 @@ async function deleteDefaultMember(memberId) {
 
 async function getGuestHistory() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('guest_history')
       .select('*')
       .order('last_appeared', { ascending: false })
@@ -217,7 +217,7 @@ async function updateGuestHistory(guestNames) {
       if (!name || !name.trim()) continue;
 
       // Check if guest exists
-      const { data: existing } = await supabase
+      const { data: existing } = await supabaseClient
         .from('guest_history')
         .select('*')
         .eq('name', name)
@@ -225,7 +225,7 @@ async function updateGuestHistory(guestNames) {
 
       if (existing) {
         // Update count and last_appeared
-        await supabase
+        await supabaseClient
           .from('guest_history')
           .update({
             times_appeared: existing.times_appeared + 1,
@@ -234,7 +234,7 @@ async function updateGuestHistory(guestNames) {
           .eq('id', existing.id);
       } else {
         // Insert new guest
-        await supabase
+        await supabaseClient
           .from('guest_history')
           .insert([{ name, times_appeared: 1 }]);
       }
