@@ -32,24 +32,24 @@
 
 <div class="main-content">
   <div class="sidebar">
-
-    <div class="card">
-      <div class="card-title">Entry Fee</div>
-      <div class="fee-breakdown" id="fee-breakdown">Configure players and relic sales first.</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Relic Sales</div>
-      <p style="font-size:0.86rem;color:var(--text-dim);margin-bottom:11px;">Add sold relic drops to reduce the entry fee.</p>
-      <div class="relic-row">
-        <input type="number" id="relic-input" placeholder="gil amount" min="0">
-        <button class="relic-add-btn" onclick="addRelicSale()">Add Sale</button>
+    <div class="sidebar-top-row">
+      <div class="card">
+        <div class="card-title">Entry Fee</div>
+        <div class="fee-breakdown" id="fee-breakdown">Configure players and relic sales first.</div>
       </div>
-      <div class="relic-items" id="relic-items"></div>
-      <div class="relic-total" id="relic-total" style="display:none"></div>
+      <div class="card">
+        <div class="card-title">Relic Sales</div>
+        <p style="font-size:0.86rem;color:var(--text-dim);margin-bottom:11px;">Add sold relic drops to reduce the entry fee.</p>
+        <div class="relic-row">
+          <input type="number" id="relic-input" placeholder="gil amount" min="0">
+          <button class="relic-add-btn" onclick="addRelicSale()">Add Sale</button>
+        </div>
+        <div class="relic-items" id="relic-items"></div>
+        <div class="relic-total" id="relic-total" style="display:none"></div>
+      </div>
     </div>
 
-    <div class="card">
+    <div class="card players-card">
       <div class="card-title">Players</div>
       <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;font-size:0.75rem;color:var(--text-dim);">
         <span>📋 <span id="ls-name-display">Linkshell</span></span>

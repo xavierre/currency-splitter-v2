@@ -228,8 +228,9 @@
   .instance-btn:hover { border-color: var(--accent); color: var(--silver); background: rgba(78,127,255,0.08); }
   .instance-btn.active { background: rgba(78,127,255,0.18); border-color: var(--accent); color: #fff; box-shadow: 0 0 10px rgba(78,127,255,0.2); }
 
-  .main-content { display: grid; grid-template-columns: 310px 1fr; min-height: calc(100vh - 200px); }
+  .main-content { display: grid; grid-template-columns: 400px 1fr; min-height: calc(100vh - 200px); }
   .sidebar { border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; gap: 16px; background: var(--surface); }
+  .sidebar-top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .content-area { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
 
   .card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
