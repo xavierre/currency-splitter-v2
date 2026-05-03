@@ -2,7 +2,8 @@
 const SUPABASE_URL = 'https://tqukwfotmokeivzlhmsy.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_SrpGLdaA-3Q-MwYdaqo6wg_qKlBNwgN';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseGlobal = typeof supabase !== 'undefined' ? supabase : window.supabase;
+const supabaseClient = supabaseGlobal.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============ AUTH FUNCTIONS ============
 async function signup(username, password) {

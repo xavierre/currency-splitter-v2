@@ -109,14 +109,28 @@ async function loadDefaultMembers() {
   }
 }
 
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function renderMemberCheckboxes() {
-  const container = document.getElementById('members-grid');
+  const container = document.getElementById('member-checkboxes');
   if (!container) return;
+
+  if (defaultMembers.length === 0) {
+    container.innerHTML = '<div style="color: var(--text-dim); padding: 12px;">No default members loaded yet. Go to Edit Members to add players.</div>';
+    return;
+  }
   
   container.innerHTML = defaultMembers.map(m => `
     <label class="member-checkbox">
-      <input type="checkbox" onchange="toggleMember('${m.name}', this.checked)">
-      <span class="member-name">${m.name}</span>
+      <input type="checkbox" data-name="${escapeHtml(m.name)}" onchange="toggleMember(this.dataset.name, this.checked)">
+      <span class="member-name">${escapeHtml(m.name)}</span>
     </label>
   `).join('');
 }
@@ -752,6 +766,14 @@ function loadRun(id) {
   }).join('');
 
   document.getElementById('results-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function init() {
+  await loadDefaultMembers();
+  renderInstanceBar();
+  renderCurrencyGrid();
+  updateFeeBreakdown();
+  updatePlayersList();
 }
 
 init();

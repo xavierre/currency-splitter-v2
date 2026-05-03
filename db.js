@@ -136,7 +136,28 @@ async function getAnalytics() {
 
 // ============ DEFAULT MEMBERS ============
 
+const DEFAULT_MEMBERS_KEY = 'dynamis_default_members';
+
+function loadLocalDefaultMembers() {
+  try {
+    return JSON.parse(localStorage.getItem(DEFAULT_MEMBERS_KEY) || '[]');
+  } catch (e) {
+    console.warn('Failed to parse local default members from localStorage:', e);
+    return [];
+  }
+}
+
+function saveLocalDefaultMembers(members) {
+  try {
+    localStorage.setItem(DEFAULT_MEMBERS_KEY, JSON.stringify(members));
+  } catch (e) {
+    console.warn('Failed to save local default members to localStorage:', e);
+  }
+}
+
 async function getDefaultMembers() {
+  const localMembers = loadLocalDefaultMembers();
+
   try {
     const { data, error } = await supabaseClient
       .from('default_members')
@@ -144,9 +165,15 @@ async function getDefaultMembers() {
       .order('name', { ascending: true });
 
     if (error) throw error;
-    return data || [];
+    const members = Array.isArray(data) ? data.map(m => ({ id: m.id, name: m.name })) : [];
+    saveLocalDefaultMembers(members);
+    return members;
   } catch (e) {
     console.error('Error fetching default members:', e);
+    if (localMembers.length > 0) {
+      console.warn('Using local default members fallback.');
+      return localMembers;
+    }
     return [];
   }
 }
@@ -168,7 +195,11 @@ async function addDefaultMember(name) {
       throw error;
     }
 
-    return { success: true, member: data[0] };
+    const member = data[0];
+    const localMembers = loadLocalDefaultMembers().filter(m => m.id !== member.id);
+    saveLocalDefaultMembers([...localMembers, { id: member.id, name: member.name }]);
+
+    return { success: true, member };
   } catch (e) {
     console.error('Error adding member:', e);
     return { success: false, error: e.message };
@@ -186,6 +217,10 @@ async function deleteDefaultMember(memberId) {
       .eq('id', memberId);
 
     if (error) throw error;
+
+    const localMembers = loadLocalDefaultMembers().filter(m => m.id !== memberId);
+    saveLocalDefaultMembers(localMembers);
+
     return { success: true };
   } catch (e) {
     console.error('Error deleting member:', e);
