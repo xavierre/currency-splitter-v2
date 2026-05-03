@@ -56,14 +56,31 @@
         <a href="manage.html" style="color:var(--accent);text-decoration:none;">Edit Members</a>
       </div>
       
-      <!-- Default members checkboxes -->
-      <div class="member-checkboxes" id="member-checkboxes" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:5px;padding:8px;background:rgba(0,0,0,0.2);"></div>
+      <div class="players-panel">
+        <div class="players-column">
+          <div class="section-label">Default Members</div>
+          <div id="member-checkboxes" class="members-grid"></div>
+        </div>
+        <div class="players-column">
+          <div class="section-label">Guest Players</div>
+          <div id="guests-list" class="guests-list"></div>
+          <button class="add-player-btn" onclick="addGuest()">＋ Add Guest</button>
+        </div>
+      </div>
 
-      <!-- Guest players -->
-      <div style="margin-bottom:12px;">
-        <label style="font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.03em;display:block;margin-bottom:6px;">Guest Players</label>
-        <div id="guest-players" style="display:flex;flex-direction:column;gap:6px;"></div>
-        <button class="add-player-btn" onclick="addGuestPlayer()" style="margin-top:6px;">＋ Add Guest</button>
+      <div class="players-summary">
+        <div class="summary-item">
+          <span>Default Members</span>
+          <strong id="default-count">0</strong>
+        </div>
+        <div class="summary-item">
+          <span>Guests</span>
+          <strong id="guest-count">0</strong>
+        </div>
+        <div class="summary-item">
+          <span>Total Players</span>
+          <strong id="total-count">0</strong>
+        </div>
       </div>
     </div>
 

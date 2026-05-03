@@ -164,6 +164,10 @@ function addGuest() {
   updatePlayersList();
 }
 
+function addGuestPlayer() {
+  addGuest();
+}
+
 function removeGuestPlayer(i) {
   guestPlayers.splice(i, 1);
   renderGuestPlayers();
