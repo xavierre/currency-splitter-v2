@@ -351,8 +351,16 @@ function calculate() {
   const leftoverBadges = cData.filter(c=>c.leftover>0)
     .map(c=>`${c.leftover} × ${coinChip(c.name,c.type)}`).join('  ');
 
+  const totalCurrency = cData.reduce((sum,c) => sum + c.perP, 0);
+  const totalCurrencyStat = cData.length > 1 ? `
+    <div class="result-stat">
+      <div class="label">currency total</div>
+      <div class="value currency">${totalCurrency}<small style="font-size:0.65em;opacity:0.55;margin-left:4px;">total</small></div>
+    </div>` : '';
+
   document.getElementById('result-stats').innerHTML = `
     ${typeStats}
+    ${totalCurrencyStat}
     <div class="result-stat">
       <div class="label">Fee Per Player</div>
       <div class="value" style="font-size:1.05rem;color:${feeColor};">${feeEach.toLocaleString()} gil</div>
