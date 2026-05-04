@@ -417,12 +417,13 @@ function calculate() {
 
 function renderPlayerBreakdown(run) {
   const hasLotteryResults = Array.isArray(run.lotteryResults) && run.lotteryResults.length > 0;
+  const hasLotteryColumn = lotteryPools.length > 0 || hasLotteryResults;
   const hasPrice = !!run.hasPrice;
   const feeColor = run.feeEach <= 0 ? 'var(--green)' : 'var(--red)';
   const netColor = run.netGil >= 0 ? 'var(--green)' : 'var(--red)';
 
   document.getElementById('dist-table-head').innerHTML =
-    `<th>Player</th><th>Currency Received</th><th>Entry Fee</th>${hasPrice?'<th>Net Balance</th>':''}${hasLotteryResults?'<th>Lottery Prizes</th>':''}`;
+    `<th>Player</th><th>Currency Received</th><th>Entry Fee</th>${hasPrice?'<th>Net Balance</th>':''}${hasLotteryColumn?'<th>Lottery Prizes</th>':''}`;
 
   const prizeMap = {};
   if (hasLotteryResults) {
@@ -438,14 +439,21 @@ function renderPlayerBreakdown(run) {
     const playerName = p || '(unnamed)';
     const lines = run.cData.filter(c => c.perP > 0)
       .map(c => `<span style="white-space:nowrap;">${c.perP} × ${coinChip(c.name, c.type)}</span>`).join('&ensp;');
-    const prizes = hasLotteryResults ? (prizeMap[playerName] || []).join(' + ') || '—' : '';
+    let prizes = '';
+    if (hasLotteryColumn) {
+      if (hasLotteryResults) {
+        prizes = (prizeMap[playerName] || []).join(' + ') || '—';
+      } else {
+        prizes = 'pending';
+      }
+    }
 
     return `<tr>
       <td class="player-name">${playerName}</td>
       <td style="line-height:2;">${lines||'—'}</td>
       <td style="color:${feeColor};font-family:var(--mono);font-size:0.86rem;">${run.feeEach.toLocaleString()} gil</td>
       ${hasPrice?`<td style="color:${netColor};font-family:var(--mono);font-size:0.86rem;">${run.netGil.toLocaleString()} gil</td>`:''}
-      ${hasLotteryResults?`<td style="font-family:var(--mono);font-size:0.86rem;">${prizes}</td>`:''}
+      ${hasLotteryColumn?`<td style="font-family:var(--mono);font-size:0.86rem;">${prizes}</td>`:''}
     </tr>`;
   }).join('');
 }
