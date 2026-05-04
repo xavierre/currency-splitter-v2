@@ -599,7 +599,7 @@
   /* COIN CHIPS */
   .coin-chip { display: inline-block; padding: 1px 7px; border-radius: 9px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; margin: 1px 2px 1px 0; }
   .coin-chip.byne   { background: rgba(240,188,46,0.18); border: 1px solid rgba(240,188,46,0.45); color: var(--gold); }
-  .coin-chip.silver { background: rgba(184,212,248,0.14); border: 1px solid rgba(184,212,248,0.4); color: var(--silver); }
+  .coin-chip.silver { background: rgba(184,212,248,0.14); border: 1px solid rgba(255, 255, 255, 0.4); color: var(--silver); }
   .coin-chip.shell  { background: rgba(0,212,200,0.12); border: 1px solid rgba(0,212,200,0.35); color: var(--teal); }
 
   .currency-zone-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; color: var(--text-dim); margin-bottom: 12px; }
