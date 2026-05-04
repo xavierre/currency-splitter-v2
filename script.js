@@ -290,6 +290,8 @@ function renderCurrencyGrid() {
   document.getElementById('currency-zone-badge').innerHTML =
     'Zone drops: ' + types.map(t => coinChip(BADGE_LABELS[t], t)).join('');
 
+  document.getElementById('currency-total-summary').innerHTML = '';
+
   document.getElementById('currency-grid').innerHTML = zone.currencies.map((c, idx) => `
     <div class="currency-block">
       <div class="currency-name-label">${c.name}</div>
@@ -313,6 +315,37 @@ function renderCurrencyGrid() {
     </div>
     ${idx < zone.currencies.length-1 ? '<div class="sep"></div>' : ''}
   `).join('');
+
+  attachCurrencyTotalListeners(zone.currencies);
+}
+
+function attachCurrencyTotalListeners(currencies) {
+  const inputs = currencies.flatMap(c => [
+    document.getElementById(`singles_${c.key}`),
+    document.getElementById(`hundreds_${c.key}`)
+  ]).filter(Boolean);
+
+  inputs.forEach(input => {
+    input.addEventListener('input', refreshCurrencyTotal);
+  });
+
+  refreshCurrencyTotal();
+}
+
+function refreshCurrencyTotal() {
+  const totalEl = document.getElementById('currency-total-summary');
+  if (!totalEl) return;
+
+  const currencyBlocks = document.querySelectorAll('[id^="singles_"]');
+  let totalCurrency = 0;
+  currencyBlocks.forEach(singleInput => {
+    const key = singleInput.id.replace('singles_', '');
+    const singles = parseInt(singleInput.value) || 0;
+    const hundreds = parseInt(document.getElementById(`hundreds_${key}`)?.value) || 0;
+    totalCurrency += singles + hundreds * 100;
+  });
+
+  totalEl.innerHTML = `Total currency: <strong>${totalCurrency.toLocaleString()}</strong>`;
 }
 
 // === CALCULATE ===
