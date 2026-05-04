@@ -98,52 +98,31 @@
   .history-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
     max-height: 600px;
     overflow-y: auto;
   }
  
   .history-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px 14px;
-    cursor: pointer;
-    transition: all 0.2s;
+    cursor: default;
+    transition: background-color 0.2s;
   }
- 
+
   .history-item:hover {
-    border-color: var(--accent);
-    background: rgba(78,127,255,0.08);
-  }
- 
-  .history-expand {
     background: rgba(78,127,255,0.04);
-    padding: 10px;
-    border-radius: 4px;
-    animation: slideDown 0.2s ease-out;
   }
- 
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      max-height: 0;
-    }
-    to {
-      opacity: 1;
-      max-height: 500px;
-    }
-  }
- 
+
   .history-item-title {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-bright);
   }
- 
+
   .history-item-meta {
     font-size: 0.78rem;
     color: var(--text-dim);
+    margin-top: 4px;
+  }
     margin-top: 4px;
   }
  
@@ -222,18 +201,25 @@
         return;
       }
  
-      // Find most active player
-      const topPlayer = Object.entries(stats.playerFrequency).length > 0
-        ? Object.entries(stats.playerFrequency).sort((a, b) => b[1] - a[1])[0]
-        : null;
- 
-      // Find avg currency
-      const avgCurrency = Object.values(stats.currencyByType).length > 0
-        ? Math.round(
-            Object.values(stats.currencyByType).reduce((sum, c) => sum + (c.avg || 0), 0) /
-            Object.keys(stats.currencyByType).length
-          )
-        : 0;
+// Find most active player (top 5)
+      const topPlayers = Object.entries(stats.playerFrequency)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      // Find top 3 runs (zones)
+      const zoneFrequency = {};
+      runs.forEach(run => {
+        zoneFrequency[run.zone_name] = (zoneFrequency[run.zone_name] || 0) + 1;
+      });
+      const topZones = Object.entries(zoneFrequency)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+      // Find avg currency per type
+      const currencyTypes = Object.entries(stats.currencyByType).map(([type, data]) => ({
+        type,
+        avg: data.avg || 0
+      }));
  
       // Build stats panel
       const statsHtml = `
@@ -256,30 +242,52 @@
           </div>
  
           <div class="stat-card">
-            <div class="stat-label">Most Active Player</div>
-            <div class="stat-value">${topPlayer ? topPlayer[0] : 'N/A'}</div>
-            <div class="stat-subtext">${topPlayer ? topPlayer[1] + ' runs' : ''}</div>
+            <div class="stat-label">Most Active Players</div>
+            <div class="stat-value">${topPlayers.length > 0 ? topPlayers[0][0] : 'N/A'}</div>
+            <div class="stat-subtext">${topPlayers.length > 0 ? topPlayers[0][1] + ' runs' : ''}</div>
+            ${topPlayers.slice(1).map(([name, runs], i) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;">${i+2}. ${name} (${runs})</div>`).join('')}
           </div>
- 
+
           <div class="stat-card">
-            <div class="stat-label">Avg Currency</div>
-            <div class="stat-value">${avgCurrency}</div>
-            <div class="stat-subtext">per run (all types)</div>
+            <div class="stat-label">Top 3 Zones</div>
+            <div class="stat-value">${topZones.length > 0 ? topZones[0][0] : 'N/A'}</div>
+            <div class="stat-subtext">${topZones.length > 0 ? topZones[0][1] + ' runs' : ''}</div>
+            ${topZones.slice(1).map(([zone, runs], i) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;">${i+2}. ${zone} (${runs})</div>`).join('')}
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Avg Currency per Type</div>
+            <div class="stat-value">${currencyTypes.length > 0 ? currencyTypes[0].avg : 0}</div>
+            <div class="stat-subtext">${currencyTypes.length > 0 ? currencyTypes[0].type : ''}</div>
+            ${currencyTypes.slice(1).map(c => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;">${c.type}: ${c.avg}</div>`).join('')}
           </div>
         </div>
       `;
  
       // Build history section
-      let historyHtml = '<div class="history-section"><div class="history-title">Recent Runs</div><div class="history-list">';
+      let historyHtml = `
+        <div class="history-section">
+          <div class="history-title">Recent Runs</div>
+          <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 8px;">
+            <div style="display: grid; grid-template-columns: 140px 80px 1fr 60px; gap: 12px; padding: 12px 16px; background: rgba(78,127,255,0.06); border-bottom: 1px solid var(--border); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);">
+              <div>Date</div>
+              <div>Members</div>
+              <div>Distribution</div>
+              <div>Actions</div>
+            </div>
+            <div class="history-list" style="max-height: 600px; overflow-y: auto;">
+      `;
       
       if (runs.length === 0) {
-        historyHtml += '<div style="color: var(--text-dim); padding: 20px; text-align: center;">No runs saved yet</div>';
+        historyHtml += '<div style="color: var(--text-dim); padding: 20px; text-align: center; grid-column: 1 / -1;">No runs saved yet</div>';
       } else {
         runs.forEach(run => {
           const date = new Date(run.date).toLocaleDateString('en-GB', {
             day: '2-digit',
             month: 'short',
-            year: 'numeric',
+            year: 'numeric'
+          });
+          const time = new Date(run.date).toLocaleTimeString('en-GB', {
             hour: '2-digit',
             minute: '2-digit'
           });
@@ -293,30 +301,35 @@
           const currencyHtml = (run.currency_data || []).map(c => 
             `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--text-dim);">${c.name}:</span> ${c.perP || 0} per player</div>`
           ).join('');
-          const lotteryHtml = (run.lotteryResults || []).map(lr =>
+          const lotteryHtml = (run.leftover_results || []).map(lr =>
             `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--gold);">${lr.name}:</span> ${(lr.wins || []).join(', ') || 'nothing'}</div>`
           ).join('');
           
           historyHtml += `
-            <div class="history-item" onclick="toggleRunExpand('${runId}')">
-              <div class="history-item-title">${run.zone_name}</div>
-              <div class="history-item-meta">${date} · ${totalPlayers} players · Fee: ${(run.entry_fee_per_player || 0).toLocaleString()} gil</div>
-              <div class="history-item-meta" style="margin-top:6px;color:var(--text-dim);font-size:0.73rem;">${playerNames}</div>
-              
-              <div id="${runId}-expand" class="history-expand" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-                <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Currency Distribution:</div>
-                ${currencyHtml || '<div style="color:var(--text-dim);">No currency data</div>'}
-                
-                <div style="font-size:0.8rem;color:var(--text-dim);margin:12px 0 8px 0;font-weight:600;">Lottery Results:</div>
-                ${lotteryHtml || '<div style="color:var(--text-dim);">No results</div>'}
+            <div class="history-item" style="display: grid; grid-template-columns: 140px 80px 1fr 60px; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(37,45,74,0.3); align-items: start;">
+              <div>
+                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-bright);">${date}</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">${time}</div>
+              </div>
+              <div>
+                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-bright);">${totalPlayers}</div>
+                <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">players</div>
+              </div>
+              <div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">${run.zone_name}</div>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">Fee: ${(run.entry_fee_per_player || 0).toLocaleString()} gil</div>
+                ${currencyHtml ? `<div style="margin-top: 6px;">${currencyHtml}</div>` : ''}
+                ${lotteryHtml ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(37,45,74,0.3);"><div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;font-weight:600;">Lottery:</div>${lotteryHtml}</div>` : ''}
+              </div>
+              <div>
+                <button onclick="deleteRun(${run.id}); event.stopPropagation();" style="background: rgba(200,64,64,0.15); border: 1px solid rgba(200,64,64,0.4); border-radius: 4px; color: var(--red); font-size: 0.7rem; padding: 4px 8px; cursor: pointer;">🗑️</button>
               </div>
             </div>
           `;
         });
       }
- 
-      historyHtml += '</div></div>';
- 
+
+      historyHtml += '</div></div></div>';
       // Combine and render
       container.innerHTML = statsHtml + historyHtml;
  
@@ -330,14 +343,26 @@
     logout();
     window.location.href = 'login.html';
   }
- 
-  function toggleRunExpand(runId) {
-    const expandEl = document.getElementById(runId + '-expand');
-    if (expandEl) {
-      expandEl.style.display = expandEl.style.display === 'none' ? 'block' : 'none';
+
+  async function deleteRun(runId) {
+    if (!confirm('Are you sure you want to delete this run? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const success = await deleteRunFromDB(runId);
+      if (success) {
+        // Reload the dashboard
+        loadDashboard();
+      } else {
+        alert('Failed to delete run. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error deleting run:', error);
+      alert('An error occurred while deleting the run.');
     }
   }
- 
+
   // Load on page load
   // Wait for scripts to load, then load page
   window.addEventListener('load', loadDashboard);

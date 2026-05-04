@@ -55,6 +55,24 @@ async function getRunHistory(limit = 100) {
   }
 }
 
+async function deleteRunFromDB(runId) {
+  try {
+    const user = getCurrentUser();
+    if (!user) return false;
+
+    const { error } = await supabaseClient
+      .from('runs')
+      .delete()
+      .eq('id', runId);
+
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error('Error deleting run:', e);
+    return false;
+  }
+}
+
 // ============ ANALYTICS ============
 
 async function getAnalytics() {
