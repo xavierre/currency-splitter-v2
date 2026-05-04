@@ -617,12 +617,13 @@ function drawLottery() {
         + (multiWinLines.length > 0 ? '<br>' + multiWinLines.join('<br>') : '');
       resultEl.classList.add('show');
 
-      // Update Discord summary
+      // Update Discord summary and breakdown
       if (lastRunData) {
         lastRunData.lotteryResults = lotteryPools.map(pool => ({
           name: pool.name, type: pool.type,
           winners: [...pool.winners].map(i => players[i] || '(unnamed)')
         }));
+        renderPlayerBreakdown(lastRunData);
         updateDiscordSummary(lastRunData);
       }
     }
