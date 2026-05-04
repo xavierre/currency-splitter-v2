@@ -34,15 +34,6 @@ This project includes both a live distribution calculator and an analytics dashb
 8. Copy the Discord summary or save the run
 9. 'Analytics' and 'Manage' are behind a login page, free to sign up, no restrictions or anything, just low profile thingy
 
-## Project Structure
-
-- `index.html` — main distribution calculator UI
-- `dashboard.html` — analytics dashboard for saved runs
-- `script.js` — calculator logic, distribution and lottery handling
-- `db.js` — Supabase database integration and analytics helpers
-- `auth.js` — authentication support for Supabase-backed persistence
-- `styles.css` — shared UI styling
-
 ## Tech Stack
 
 - HTML5, CSS3, Vanilla JavaScript
