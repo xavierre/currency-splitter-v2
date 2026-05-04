@@ -78,18 +78,9 @@ async function getAnalytics() {
       dateRange: { start: null, end: null }
     };
 
-    runs.forEach(run => {
-      const salesIncome = typeof run.relic_sales === 'number'
-        ? run.relic_sales
-        : (() => {
-            const numPlayers = (run.default_members?.length || 0) + (run.guest_players?.length || 0);
-            if (numPlayers > 0 && typeof run.entry_fee_per_player === 'number') {
-              const totalFeePaid = run.entry_fee_per_player * numPlayers;
-              return Math.max(0, BASE_FEE - totalFeePaid);
-            }
-            return 0;
-          })();
-      stats.totalSales += salesIncome;
+runs.forEach(run => {
+      // Add relic sales directly
+      stats.totalSales += (run.relic_sales || 0);
 
       // Avg fee
       stats.avgFeePerPlayer += run.entry_fee_per_player;
