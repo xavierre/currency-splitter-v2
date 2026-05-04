@@ -426,19 +426,27 @@ function renderPlayerBreakdown(run) {
     `<th>Player</th><th>Currency Received</th><th>Entry Fee</th>${hasPrice?'<th>Net Balance</th>':''}${hasLotteryColumn?'<th>Lottery Prizes</th>':''}`;
 
   const prizeMap = {};
+  const extraByPlayer = {};
   if (hasLotteryResults) {
     run.lotteryResults.forEach(pool => {
       pool.winners.forEach(name => {
         prizeMap[name] = prizeMap[name] || [];
         prizeMap[name].push(coinChip(pool.name, pool.type));
+        extraByPlayer[name] = extraByPlayer[name] || {};
+        extraByPlayer[name][pool.type] = (extraByPlayer[name][pool.type] || 0) + 1;
       });
     });
   }
 
   document.getElementById('dist-table-body').innerHTML = players.map(p => {
     const playerName = p || '(unnamed)';
-    const lines = run.cData.filter(c => c.perP > 0)
-      .map(c => `<span style="white-space:nowrap;">${c.perP} × ${coinChip(c.name, c.type)}</span>`).join('&ensp;');
+    const lines = run.cData.map(c => {
+      const extra = extraByPlayer[playerName]?.[c.type] || 0;
+      const totalCount = c.perP + extra;
+      return totalCount > 0
+        ? `<span style="white-space:nowrap;">${totalCount} × ${coinChip(c.name, c.type)}</span>`
+        : '';
+    }).filter(Boolean).join('&ensp;');
     let prizes = '';
     if (hasLotteryColumn) {
       if (hasLotteryResults) {
