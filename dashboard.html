@@ -383,9 +383,15 @@
               <span style="color:var(--text-dim);">:</span> ${c.perP || 0} per player
             </div>`;
           }).join('');
-          const lotteryHtml = (run.lotteryResults || []).map(lr =>
-            `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--gold);">${lr.name}:</span> ${(lr.winners || []).join(', ') || 'nothing'}</div>`
-          ).join('');
+          const lotteryData = run.lotteryResults || run.leftover_results || [];
+          const lotteryHtml = (lotteryData || []).map(lr => {
+            const winners = Array.isArray(lr.winners)
+              ? lr.winners
+              : Array.isArray(lr.wins)
+                ? lr.wins
+                : [];
+            return `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--gold);">${lr.name}:</span> ${winners.join(', ') || 'nothing'}</div>`;
+          }).join('');
           
           historyHtml += `
             <div class="history-item" onclick="toggleRunExpand('${runId}')">
