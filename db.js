@@ -16,6 +16,7 @@ async function saveDynamisRun(runData) {
         default_members: runData.defaultMembers || [],
         guest_players: runData.guestPlayers || [],
         entry_fee_per_player: runData.feeEach,
+        relic_sales: runData.relicSales || 0,
         currency_data: runData.cData,
         leftover_results: runData.lotteryResults || null
       }])
@@ -78,13 +79,17 @@ async function getAnalytics() {
     };
 
     runs.forEach(run => {
-      const numPlayers = (run.default_members?.length || 0) + (run.guest_players?.length || 0);
-      if (numPlayers > 0 && typeof run.entry_fee_per_player === 'number') {
-        const totalFeePaid = run.entry_fee_per_player * numPlayers;
-        // Infer relic sales from how much the base fee was reduced.
-        const salesIncome = Math.max(0, BASE_FEE - totalFeePaid);
-        stats.totalSales += salesIncome;
-      }
+      const salesIncome = typeof run.relic_sales === 'number'
+        ? run.relic_sales
+        : (() => {
+            const numPlayers = (run.default_members?.length || 0) + (run.guest_players?.length || 0);
+            if (numPlayers > 0 && typeof run.entry_fee_per_player === 'number') {
+              const totalFeePaid = run.entry_fee_per_player * numPlayers;
+              return Math.max(0, BASE_FEE - totalFeePaid);
+            }
+            return 0;
+          })();
+      stats.totalSales += salesIncome;
 
       // Avg fee
       stats.avgFeePerPlayer += run.entry_fee_per_player;

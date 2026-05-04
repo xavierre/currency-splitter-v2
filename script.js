@@ -422,6 +422,7 @@ function calculate() {
     playerNames: players.map(p => p || '(unnamed)'),
     cData: cData.map(c => ({ name: c.name, type: c.type, perP: c.perP, price: c.price })),
     feeEach, netGil, hasPrice,
+    relicSales: relicTotal(),
     leftovers: leftovers.map(c => ({ name: c.name, type: c.type, count: c.leftover })),
     lotteryResults
   };
@@ -698,6 +699,7 @@ function saveRun() {
       defaultMembers: Array.from(selectedMembers),
       guestPlayers: guestPlayers.filter(g => g.trim()),
       feeEach: lastRunData.feeEach,
+      relicSales: lastRunData.relicSales || 0,
       cData: lastRunData.cData,
       lotteryResults: lastRunData.lotteryResults
     };
