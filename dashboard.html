@@ -80,6 +80,20 @@
     color: var(--text-dim);
     margin-top: 4px;
   }
+
+  .stat-list-item {
+    margin-top: 6px;
+    font-size: 0.94rem;
+    color: var(--text-bright);
+  }
+  .stat-list-item-primary {
+    font-size: 1.1rem;
+    color: var(--gold-light);
+    font-weight: 700;
+  }
+  .stat-list-item:first-child {
+    margin-top: 0;
+  }
  
   .history-section {
     display: flex;
@@ -104,6 +118,7 @@
   }
 
   .history-item {
+    display: block;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -117,7 +132,16 @@
     background: rgba(78,127,255,0.08);
   }
 
+  .history-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
   .history-expand {
+    margin-top: 12px;
     background: rgba(78,127,255,0.04);
     padding: 10px;
     border-radius: 4px;
@@ -258,16 +282,20 @@
  
           <div class="stat-card">
             <div class="stat-label">Most Active Players</div>
-            <div class="stat-value">${topPlayers.length > 0 ? topPlayers[0][0] : 'N/A'}</div>
-            <div class="stat-subtext">${topPlayers.length > 0 ? topPlayers[0][1] + ' runs' : ''}</div>
-            ${topPlayers.slice(1).map(([name, runs]) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;color:var(--text-dim);">${name} (${runs})</div>`).join('')}
+            ${topPlayers.map(([name, runs], index) => `
+              <div class="stat-list-item${index === 0 ? ' stat-list-item-primary' : ''}">
+                ${name} (${runs} run${runs === 1 ? '' : 's'})
+              </div>
+            `).join('')}
           </div>
 
           <div class="stat-card">
             <div class="stat-label">Top 3 Zones</div>
-            <div class="stat-value">${topZones.length > 0 ? topZones[0][0] : 'N/A'}</div>
-            <div class="stat-subtext">${topZones.length > 0 ? topZones[0][1] + ' runs' : ''}</div>
-            ${topZones.slice(1).map(([zone, runs]) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;color:var(--text-dim);">${zone} (${runs})</div>`).join('')}
+            ${topZones.map(([zone, runs], index) => `
+              <div class="stat-list-item${index === 0 ? ' stat-list-item-primary' : ''}">
+                ${zone} (${runs} run${runs === 1 ? '' : 's'})
+              </div>
+            `).join('')}
           </div>
 
           <div class="stat-card">
@@ -311,8 +339,9 @@
           
           historyHtml += `
             <div class="history-item" onclick="toggleRunExpand('${runId}')">
-              <div class="history-item-title">${date} | ${run.zone_name} | ${totalPlayers} members | ${totalCurrency} total currency</div>
-              
+              <div class="history-item-header">
+                <div class="history-item-title">${date} | ${run.zone_name} | ${totalPlayers} members | ${totalCurrency} total currency</div>
+              </div>
               <div id="${runId}-expand" class="history-expand" style="display:none;">
                 <div style="margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px;">
                   <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Members:</div>
