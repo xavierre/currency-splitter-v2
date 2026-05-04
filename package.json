@@ -1,0 +1,17 @@
+{
+  "name": "currency-splitter-v2",
+  "version": "1.0.0",
+  "description": "A Final Fantasy XI tool for managing and distributing ancient currency (Dynamis coins) among party members.",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "lint": "echo 'No linter configured'"
+  },
+  "keywords": ["ffxi", "dynamis", "currency", "distributor"],
+  "author": "Xavierre",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^1.1.1"
+  }
+}
