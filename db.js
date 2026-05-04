@@ -60,6 +60,19 @@ async function deleteRunFromDB(runId) {
     const user = getCurrentUser();
     if (!user) return false;
 
+    // First check if the run belongs to the current user
+    const { data: run, error: fetchError } = await supabaseClient
+      .from('runs')
+      .select('id')
+      .eq('id', runId)
+      .single();
+
+    if (fetchError || !run) {
+      console.error('Run not found or access denied');
+      return false;
+    }
+
+    // Delete the run
     const { error } = await supabaseClient
       .from('runs')
       .delete()

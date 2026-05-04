@@ -98,21 +98,41 @@
   .history-list {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 10px;
     max-height: 600px;
     overflow-y: auto;
   }
- 
+
   .history-item {
-    cursor: default;
-    transition: background-color 0.2s;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
   }
 
   .history-item:hover {
-    background: rgba(78,127,255,0.04);
+    border-color: var(--accent);
+    background: rgba(78,127,255,0.08);
   }
 
-  .history-item-title {
+  .history-expand {
+    background: rgba(78,127,255,0.04);
+    padding: 10px;
+    border-radius: 4px;
+    animation: slideDown 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 500px;
+    }
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-bright);
@@ -245,14 +265,14 @@
             <div class="stat-label">Most Active Players</div>
             <div class="stat-value">${topPlayers.length > 0 ? topPlayers[0][0] : 'N/A'}</div>
             <div class="stat-subtext">${topPlayers.length > 0 ? topPlayers[0][1] + ' runs' : ''}</div>
-            ${topPlayers.slice(1).map(([name, runs], i) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;">${i+2}. ${name} (${runs})</div>`).join('')}
+            ${topPlayers.slice(1).map(([name, runs]) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;color:var(--text-dim);">${name} (${runs})</div>`).join('')}
           </div>
 
           <div class="stat-card">
             <div class="stat-label">Top 3 Zones</div>
             <div class="stat-value">${topZones.length > 0 ? topZones[0][0] : 'N/A'}</div>
             <div class="stat-subtext">${topZones.length > 0 ? topZones[0][1] + ' runs' : ''}</div>
-            ${topZones.slice(1).map(([zone, runs], i) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;">${i+2}. ${zone} (${runs})</div>`).join('')}
+            ${topZones.slice(1).map(([zone, runs]) => `<div class="stat-subtext" style="font-size:0.7rem;margin-top:2px;color:var(--text-dim);">${zone} (${runs})</div>`).join('')}
           </div>
 
           <div class="stat-card">
@@ -268,36 +288,25 @@
       let historyHtml = `
         <div class="history-section">
           <div class="history-title">Recent Runs</div>
-          <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 8px;">
-            <div style="display: grid; grid-template-columns: 140px 80px 1fr 60px; gap: 12px; padding: 12px 16px; background: rgba(78,127,255,0.06); border-bottom: 1px solid var(--border); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim);">
-              <div>Date</div>
-              <div>Members</div>
-              <div>Distribution</div>
-              <div>Actions</div>
-            </div>
-            <div class="history-list" style="max-height: 600px; overflow-y: auto;">
+          <div class="history-list">
       `;
       
       if (runs.length === 0) {
-        historyHtml += '<div style="color: var(--text-dim); padding: 20px; text-align: center; grid-column: 1 / -1;">No runs saved yet</div>';
+        historyHtml += '<div style="color: var(--text-dim); padding: 20px; text-align: center;">No runs saved yet</div>';
       } else {
         runs.forEach(run => {
           const date = new Date(run.date).toLocaleDateString('en-GB', {
             day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-          });
-          const time = new Date(run.date).toLocaleTimeString('en-GB', {
-            hour: '2-digit',
-            minute: '2-digit'
+            month: 'short'
           });
           const totalPlayers = (run.default_members?.length || 0) + (run.guest_players?.length || 0);
+          const totalCurrency = (run.currency_data || []).reduce((sum, c) => sum + (c.perP || 0), 0);
+          
+          const runId = `run-${run.id}`;
           const playerNames = [
             ...(run.default_members || []),
             ...(run.guest_players || [])
           ].join(', ');
-          
-          const runId = `run-${run.id}`;
           const currencyHtml = (run.currency_data || []).map(c => 
             `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--text-dim);">${c.name}:</span> ${c.perP || 0} per player</div>`
           ).join('');
@@ -306,30 +315,34 @@
           ).join('');
           
           historyHtml += `
-            <div class="history-item" style="display: grid; grid-template-columns: 140px 80px 1fr 60px; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(37,45,74,0.3); align-items: start;">
-              <div>
-                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-bright);">${date}</div>
-                <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">${time}</div>
-              </div>
-              <div>
-                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-bright);">${totalPlayers}</div>
-                <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">players</div>
-              </div>
-              <div>
-                <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 4px;">${run.zone_name}</div>
-                <div style="font-size: 0.75rem; color: var(--text-dim);">Fee: ${(run.entry_fee_per_player || 0).toLocaleString()} gil</div>
-                ${currencyHtml ? `<div style="margin-top: 6px;">${currencyHtml}</div>` : ''}
-                ${lotteryHtml ? `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(37,45,74,0.3);"><div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:4px;font-weight:600;">Lottery:</div>${lotteryHtml}</div>` : ''}
-              </div>
-              <div>
-                <button onclick="deleteRun(${run.id}); event.stopPropagation();" style="background: rgba(200,64,64,0.15); border: 1px solid rgba(200,64,64,0.4); border-radius: 4px; color: var(--red); font-size: 0.7rem; padding: 4px 8px; cursor: pointer;">🗑️</button>
+            <div class="history-item" onclick="toggleRunExpand('${runId}')">
+              <div class="history-item-title">${date} | ${run.zone_name} | ${totalPlayers} members | ${totalCurrency} total currency</div>
+              
+              <div id="${runId}-expand" class="history-expand" style="display:none;">
+                <div style="margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                  <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Members:</div>
+                  <div style="font-size:0.85rem;color:var(--text-bright);margin-bottom:12px;">${playerNames}</div>
+                  
+                  <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Currency Distribution:</div>
+                  ${currencyHtml || '<div style="color:var(--text-dim);">No currency data</div>'}
+                  
+                  <div style="font-size:0.8rem;color:var(--text-dim);margin:12px 0 8px 0;font-weight:600;">Fee & Sales:</div>
+                  <div style="font-size:0.85rem;margin-bottom:8px;">Entry Fee: ${(run.entry_fee_per_player || 0).toLocaleString()} gil per player</div>
+                  <div style="font-size:0.85rem;margin-bottom:12px;">Relic Sales: ${(run.relic_sales || 0).toLocaleString()} gil</div>
+                  
+                  <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Lottery Results:</div>
+                  ${lotteryHtml || '<div style="color:var(--text-dim);">No results</div>'}
+                </div>
+                <div style="text-align: right; margin-top: 8px;">
+                  <button onclick="deleteRun('${run.id}'); event.stopPropagation();" style="background: rgba(200,64,64,0.15); border: 1px solid rgba(200,64,64,0.4); border-radius: 4px; color: var(--red); font-size: 0.7rem; padding: 4px 8px; cursor: pointer;">🗑️ Delete</button>
+                </div>
               </div>
             </div>
           `;
         });
       }
 
-      historyHtml += '</div></div></div>';
+      historyHtml += '</div></div>';
       // Combine and render
       container.innerHTML = statsHtml + historyHtml;
  
@@ -360,6 +373,13 @@
     } catch (error) {
       console.error('Error deleting run:', error);
       alert('An error occurred while deleting the run.');
+    }
+  }
+
+  function toggleRunExpand(runId) {
+    const expandEl = document.getElementById(runId + '-expand');
+    if (expandEl) {
+      expandEl.style.display = expandEl.style.display === 'none' ? 'block' : 'none';
     }
   }
 
