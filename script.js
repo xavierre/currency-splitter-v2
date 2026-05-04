@@ -777,7 +777,7 @@ function saveRun() {
       feeEach: lastRunData.feeEach,
       relicSales: lastRunData.relicSales || 0,
       cData: lastRunData.cData,
-      lotteryResults: lastRunData.lotteryResults
+      lotteryResults: lastRunData.lotteryResults || []
     };
 
     // Call from db.js

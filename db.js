@@ -18,7 +18,7 @@ async function saveDynamisRun(runData) {
         entry_fee_per_player: runData.feeEach,
         relic_sales: runData.relicSales || 0,
         currency_data: runData.cData,
-        leftover_results: runData.lotteryResults || null
+        leftover_results: runData.lotteryResults
       }])
       .select();
 
