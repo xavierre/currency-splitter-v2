@@ -17,14 +17,14 @@ This project includes both a live distribution calculator and an analytics dashb
 - **Currency Distribution**: Calculate fair per-player currency distribution
 - **Leftover Lottery**: Randomly distribute remaining currency pieces among selected players
 - **Discord Export**: Generate copyable Discord summary text for run results
-- **Run History**: Save runs locally and optionally persist them to Supabase when logged in
+- **Run History**: Save runs with a remote db, so accessible on every device / anywhere
 - **Analytics Dashboard**: Review recent runs, see top active players, top zones, and average currency by type
 - **Lottery Result Display**: Saved runs include lottery winners in analytics view
 - **Run Deletion**: Remove saved runs from the history
 
 ## Usage
 
-1. Open `index.html` in your browser
+1. Open (https://currency-splitter-v2.vercel.app/) in your browser
 2. Select a Dynamis region (Original or Dreamlands)
 3. Choose the zone from the instance bar
 4. Add party members and guest players
@@ -32,7 +32,7 @@ This project includes both a live distribution calculator and an analytics dashb
 6. Click "Calculate Distribution" to see the per-player split
 7. Use "Draw Winners" to allocate leftover currency via lottery
 8. Copy the Discord summary or save the run
-9. Open `dashboard.html` to view analytics and recent saved runs
+9. 'Analytics' and 'Manage' are behind a login page, free to sign up, no restrictions or anything, just low profile thingy
 
 ## Project Structure
 
