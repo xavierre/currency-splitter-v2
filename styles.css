@@ -606,7 +606,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    width: min(360px, 100%);
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid rgba(255, 207, 95, 0.25);
@@ -615,7 +615,7 @@
     font-weight: 700;
     letter-spacing: 0.01em;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 6px 18px rgba(0,0,0,0.08);
-    margin-bottom: 12px;
+    margin: 8px 0 12px auto;
   }
   .currency-total-summary strong {
     color: var(--gold-light);
