@@ -67,6 +67,7 @@ async function getAnalytics() {
 
     if (error || !runs) return null;
 
+    const BASE_FEE = 1000000;
     const stats = {
       totalRuns: runs.length,
       totalSales: 0,
@@ -77,10 +78,12 @@ async function getAnalytics() {
     };
 
     runs.forEach(run => {
-      // Sales (negative fees = profit)
-      if (run.entry_fee_per_player < 0) {
-        const numPlayers = (run.default_members?.length || 0) + (run.guest_players?.length || 0);
-        stats.totalSales += Math.abs(run.entry_fee_per_player) * numPlayers;
+      const numPlayers = (run.default_members?.length || 0) + (run.guest_players?.length || 0);
+      if (numPlayers > 0 && typeof run.entry_fee_per_player === 'number') {
+        const totalFeePaid = run.entry_fee_per_player * numPlayers;
+        // Infer relic sales from how much the base fee was reduced.
+        const salesIncome = Math.max(0, BASE_FEE - totalFeePaid);
+        stats.totalSales += salesIncome;
       }
 
       // Avg fee
