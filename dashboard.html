@@ -375,9 +375,11 @@
             ...(run.guest_players || [])
           ].join(', ');
           const currencyHtml = (run.currency_data || []).map(c => {
-            const chipClass = c.name.toLowerCase().includes('byne') ? 'byne' :
-                             c.name.toLowerCase().includes('silver') ? 'silver' :
-                             c.name.toLowerCase().includes('shell') ? 'shell' : '';
+            const currencyType = (c.type || '').toLowerCase();
+            const chipClass = currencyType ||
+                             ((c.name || '').toLowerCase().includes('byne') ? 'byne' :
+                             (c.name || '').toLowerCase().includes('silver') ? 'silver' :
+                             (c.name || '').toLowerCase().includes('shell') ? 'shell' : '');
             return `<div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;margin:4px 0;">
               <span class="coin-chip ${chipClass}">${c.name}</span>
               <span style="color:var(--text-dim);">:</span> ${c.perP || 0} per player
