@@ -140,6 +140,34 @@
     flex-wrap: wrap;
   }
 
+  .history-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+
+  .history-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .history-summary-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .history-summary-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
   .history-expand {
     margin-top: 12px;
     background: rgba(78,127,255,0.04);
@@ -340,7 +368,24 @@
           historyHtml += `
             <div class="history-item" onclick="toggleRunExpand('${runId}')">
               <div class="history-item-header">
-                <div class="history-item-title">${date} | ${run.zone_name} | ${totalPlayers} members | ${totalCurrency} total currency</div>
+                <div class="history-summary-grid">
+                  <div class="history-summary-item">
+                    <div class="history-summary-label">Date</div>
+                    <div class="history-summary-value">${date}</div>
+                  </div>
+                  <div class="history-summary-item">
+                    <div class="history-summary-label">Zone</div>
+                    <div class="history-summary-value">${run.zone_name}</div>
+                  </div>
+                  <div class="history-summary-item">
+                    <div class="history-summary-label">Members</div>
+                    <div class="history-summary-value">${totalPlayers}</div>
+                  </div>
+                  <div class="history-summary-item">
+                    <div class="history-summary-label">Currency</div>
+                    <div class="history-summary-value">${totalCurrency}</div>
+                  </div>
+                </div>
               </div>
               <div id="${runId}-expand" class="history-expand" style="display:none;">
                 <div style="margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px;">
