@@ -758,71 +758,72 @@ function copyDiscord() {
   });
 }
 
-// === RUN HISTORY (localStorage) ===
-const HISTORY_KEY = 'dynamis_run_history';
+// === RUN HISTORY (DB-backed) ===
+let _historyRuns = [];
 
-function loadHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-  } catch { return []; }
+function normalizeDbRun(r) {
+  return {
+    id: r.id,
+    date: new Date(r.date).toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    }),
+    zoneName: (r.zone_name || '').replace('Dynamis — ', ''),
+    cData: r.currency_data || [],
+    playerNames: [...(r.default_members || []), ...(r.guest_players || [])],
+    feeEach: r.entry_fee_per_player || 0,
+    netGil: 0,
+    hasPrice: false,
+    relicSales: r.relic_sales || 0,
+    leftovers: (r.leftover_results || []).filter(l => l.count > 0),
+    lotteryResults: r.leftover_results || []
+  };
 }
 
-function saveHistory(history) {
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch {}
-}
-
-function saveRun() {
-  if (!lastRunData) { alert('Calculate a distribution first.'); return; }
-  
-  // Save to localStorage (always works)
-  const history = loadHistory();
-  history.unshift({ ...lastRunData, id: Date.now() });
-  if (history.length > 50) history.splice(50);
-  saveHistory(history);
+async function refreshHistory() {
+  const runs = await getRunHistory();
+  _historyRuns = (runs || []).map(normalizeDbRun);
   renderHistory();
-  
-  // Also try to save to Supabase
-  if (isLoggedIn()) {
-    const runData = {
-      zoneName: lastRunData.zoneName,
-      date: lastRunData.date,
-      defaultMembers: Array.from(selectedMembers),
-      guestPlayers: guestPlayers.filter(g => g.trim()),
-      feeEach: lastRunData.feeEach,
-      relicSales: lastRunData.relicSales || 0,
-      cData: lastRunData.cData,
-      lotteryResults: lastRunData.lotteryResults || []
-    };
+}
 
-    // Call from db.js
-    saveDynamisRun(runData).then(result => {
-      if (result) {
-        console.log('Run also saved to database');
-      }
-    });
+async function saveRun() {
+  if (!lastRunData) { alert('Calculate a distribution first.'); return; }
+
+  const btn = event?.target;
+  const orig = btn?.textContent;
+  if (btn) btn.textContent = '💾 Saving...';
+
+  await saveDynamisRun({
+    zoneName: lastRunData.zoneName,
+    date: lastRunData.date,
+    defaultMembers: Array.from(selectedMembers),
+    guestPlayers: guestPlayers.filter(g => g.trim()),
+    feeEach: lastRunData.feeEach,
+    relicSales: lastRunData.relicSales || 0,
+    cData: lastRunData.cData,
+    lotteryResults: lastRunData.lotteryResults || []
+  });
+
+  await refreshHistory();
+
+  if (btn) {
+    btn.textContent = '✓ Saved!';
+    setTimeout(() => { if (btn) btn.textContent = orig; }, 1800);
   }
-
-  const btn = event.target;
-  const orig = btn.textContent;
-  btn.textContent = '✓ Saved!';
-  setTimeout(() => btn.textContent = orig, 1800);
 }
 
 function clearHistory() {
-  if (!confirm('Clear all run history?')) return;
-  saveHistory([]);
-  renderHistory();
+  refreshHistory();
 }
 
-function deleteRun(id) {
-  const history = loadHistory().filter(r => r.id !== id);
-  saveHistory(history);
-  renderHistory();
+async function deleteRun(id) {
+  await deleteRunFromDB(id);
+  await refreshHistory();
 }
 
 function renderHistory() {
   const list = document.getElementById('history-list');
-  const history = loadHistory().slice(0, 5);
+  const history = _historyRuns.slice(0, 5);
   if (history.length === 0) {
     list.innerHTML = '<div class="history-empty">No runs saved yet. Calculate a distribution and click Save Run.</div>';
     return;
@@ -834,7 +835,7 @@ function renderHistory() {
         const date = escapeHtml(run.date.split(',')[0]);
         const zone = escapeHtml(run.zoneName);
         const total = run.cData.reduce((s, c) => s + (c.total || 0), 0);
-        return `<tr onclick="loadRun(${run.id})" style="cursor:pointer;" title="Click to load run">
+        return `<tr onclick="loadRun('${run.id}')" style="cursor:pointer;" title="Click to load run">
           <td>${date}</td>
           <td>${zone}</td>
           <td>${total.toLocaleString()}</td>
@@ -844,7 +845,7 @@ function renderHistory() {
 }
 
 function loadRun(id) {
-  const run = loadHistory().find(r => r.id === id);
+  const run = _historyRuns.find(r => r.id === id);
   if (!run) return;
   // Restore discord summary view
   lastRunData = run;
@@ -893,6 +894,7 @@ async function init() {
   renderCurrencyGrid();
   updateFeeBreakdown();
   updatePlayersList();
+  await refreshHistory();
 }
 
 init();

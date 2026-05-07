@@ -103,10 +103,11 @@
     font-weight: 700;
     color: var(--gold);
     letter-spacing: -0.02em;
-    border: 2px solid rgba(0,0,0,0.85);
+    border: 2px solid rgba(255,255,255,0.35);
     padding: 6px 20px;
     border-radius: 5px;
-    background: rgba(0,0,0,0.25);
+    background: rgba(255,255,255,0.06);
+    -webkit-text-stroke: 1px rgba(0,0,0,0.85);
     text-shadow:
       0 0 10px rgba(240,188,46,1),
       0 0 30px rgba(240,188,46,0.85),
