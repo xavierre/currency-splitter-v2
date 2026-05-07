@@ -877,13 +877,9 @@ function loadRun(id) {
 
 async function init() {
   await _authReady;
-  if (!isLoggedIn()) {
-    window.location.href = 'login.html';
-    return;
-  }
 
   const userEl = document.getElementById('header-user');
-  if (userEl) {
+  if (userEl && isLoggedIn()) {
     const username = getCurrentUser()?.email?.split('@')[0] || '';
     userEl.textContent = '👤 ' + username;
     userEl.style.display = '';
@@ -895,6 +891,11 @@ async function init() {
   updateFeeBreakdown();
   updatePlayersList();
   await refreshHistory();
+
+  if (!sessionStorage.getItem('zonePicked')) {
+    const overlay = document.getElementById('zone-picker-overlay');
+    if (overlay) overlay.style.display = 'flex';
+  }
 }
 
 init();

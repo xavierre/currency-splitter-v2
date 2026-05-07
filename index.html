@@ -184,7 +184,7 @@
 <div id="zone-picker-overlay" style="
   position:fixed;inset:0;z-index:9999;
   background:rgba(8,10,16,0.85);
-  display:flex;align-items:center;justify-content:center;
+  display:none;align-items:center;justify-content:center;
   backdrop-filter:blur(4px);
 ">
   <div style="
@@ -222,7 +222,7 @@
     </select>
 
     <div style="display:flex;gap:10px;justify-content:flex-end;">
-      <button onclick="document.getElementById('zone-picker-overlay').style.display='none'" style="
+      <button onclick="sessionStorage.setItem('zonePicked','1');document.getElementById('zone-picker-overlay').style.display='none'" style="
         padding:9px 18px;background:none;
         border:1px solid #252d4a;border-radius:6px;
         color:#5a6488;font-family:inherit;font-size:0.88rem;cursor:pointer;
@@ -233,6 +233,7 @@
         var val = document.getElementById('zone-picker-select').value.split(':');
         switchSection(val[0]);
         switchZone(val[1]);
+        sessionStorage.setItem('zonePicked','1');
         document.getElementById('zone-picker-overlay').style.display='none';
       " style="
         padding:9px 18px;background:rgba(78,127,255,0.18);
