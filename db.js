@@ -117,10 +117,16 @@ runs.forEach(run => {
       // Avg fee
       stats.avgFeePerPlayer += run.entry_fee_per_player;
 
-      // Count 100-piece drops (types with drops)
+      // Count 100-piece drops by actual hundreds input or total value
       if (run.currency_data && Array.isArray(run.currency_data)) {
-        const hundredPieceCount = run.currency_data.filter(c => (c.perP || 0) > 0).length;
-        stats.total100PieceDrops += hundredPieceCount;
+        run.currency_data.forEach(c => {
+          const hundreds = typeof c.hundreds === 'number'
+            ? c.hundreds
+            : typeof c.total === 'number'
+              ? Math.floor(c.total / 100)
+              : 0;
+          stats.total100PieceDrops += hundreds;
+        });
       }
 
       // Currency breakdown

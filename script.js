@@ -361,7 +361,7 @@ function calculate() {
     const price    = parseInt(document.getElementById('price_'   +c.key).value)||0;
     const perP     = Math.floor(total/n);
     const leftover = total%n;
-    return { ...c, total, perP, leftover, price };
+    return { ...c, singles, hundreds, total, perP, leftover, price };
   });
 
   const feeEach     = feePerPlayer();
@@ -438,7 +438,15 @@ function calculate() {
     zoneName: zone.name.replace('Dynamis — ', ''),
     date,
     playerNames: players.map(p => p || '(unnamed)'),
-    cData: cData.map(c => ({ name: c.name, type: c.type, perP: c.perP, price: c.price })),
+    cData: cData.map(c => ({
+      name: c.name,
+      type: c.type,
+      singles: c.singles,
+      hundreds: c.hundreds,
+      total: c.total,
+      perP: c.perP,
+      price: c.price
+    })),
     feeEach, netGil, hasPrice,
     relicSales: relicTotal(),
     leftovers: leftovers.map(c => ({ name: c.name, type: c.type, count: c.leftover })),
