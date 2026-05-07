@@ -106,6 +106,7 @@ async function getAnalytics() {
       avgFeePerPlayer: 0,
       currencyByType: {},
       playerFrequency: {},
+      total100PieceDrops: 0,
       dateRange: { start: null, end: null }
     };
 
@@ -115,6 +116,12 @@ runs.forEach(run => {
 
       // Avg fee
       stats.avgFeePerPlayer += run.entry_fee_per_player;
+
+      // Count 100-piece drops (types with drops)
+      if (run.currency_data && Array.isArray(run.currency_data)) {
+        const hundredPieceCount = run.currency_data.filter(c => (c.perP || 0) > 0).length;
+        stats.total100PieceDrops += hundredPieceCount;
+      }
 
       // Currency breakdown
       if (run.currency_data && Array.isArray(run.currency_data)) {

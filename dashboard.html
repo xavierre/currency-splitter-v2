@@ -303,6 +303,12 @@
           </div>
  
           <div class="stat-card">
+            <div class="stat-label">Total 100-Piece Drops</div>
+            <div class="stat-value">${stats.total100PieceDrops || 0}</div>
+            <div class="stat-subtext">combined (Byne, Mont, Lungo)</div>
+          </div>
+
+          <div class="stat-card">
             <div class="stat-label">Avg Entry Fee</div>
             <div class="stat-value">${(stats.avgFeePerPlayer || 0).toLocaleString()}</div>
             <div class="stat-subtext">per player per run</div>
@@ -336,19 +342,21 @@
       `;
  
       // Build history section
-      let historyHtml = `
         <div class="history-section">
           <div class="history-title">Recent Runs</div>
           <div class="history-header">
             <div class="history-summary-grid">
               <div class="history-summary-item">
-                <div class="history-summary-label">Date</div>
+                <div class="history-summary-label">Date & Time</div>
               </div>
               <div class="history-summary-item">
                 <div class="history-summary-label">Zone</div>
               </div>
               <div class="history-summary-item">
                 <div class="history-summary-label">Members</div>
+              </div>
+              <div class="history-summary-item">
+                <div class="history-summary-label">100-Piece Count</div>
               </div>
               <div class="history-summary-item">
                 <div class="history-summary-label">Currency</div>
@@ -362,12 +370,20 @@
         historyHtml += '<div style="color: var(--text-dim); padding: 20px; text-align: center;">No runs saved yet</div>';
       } else {
         runs.forEach(run => {
-          const date = new Date(run.date).toLocaleDateString('en-GB', {
+          const runDate = new Date(run.date);
+          const date = runDate.toLocaleDateString('en-GB', {
             day: '2-digit',
             month: 'short'
           });
+          const time = runDate.toLocaleTimeString('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
           const totalPlayers = (run.default_members?.length || 0) + (run.guest_players?.length || 0);
           const totalCurrency = (run.currency_data || []).reduce((sum, c) => sum + (c.perP || 0), 0);
+          
+          // Count 100-piece drops (currency types with drops)
+          const hundredPieceCount = (run.currency_data || []).filter(c => (c.perP || 0) > 0).length;
           
           const runId = `run-${run.id}`;
           const playerNames = [
@@ -399,7 +415,8 @@
             <div class="history-item" onclick="toggleRunExpand('${runId}')">
               <div class="history-summary-grid">
                 <div class="history-summary-item">
-                  <div class="history-summary-value">${date}</div>
+                  <div class="history-summary-value" title="${date} ${time}">${date}</div>
+                  <div class="history-summary-value" style="font-size:0.75rem;color:var(--text-dim);">${time}</div>
                 </div>
                 <div class="history-summary-item">
                   <div class="history-summary-value">${run.zone_name}</div>
@@ -408,11 +425,20 @@
                   <div class="history-summary-value">${totalPlayers}</div>
                 </div>
                 <div class="history-summary-item">
+                  <div class="history-summary-value" style="color:var(--gold);">${hundredPieceCount}</div>
+                </div>
+                <div class="history-summary-item">
                   <div class="history-summary-value">${totalCurrency}</div>
                 </div>
               </div>
               <div id="${runId}-expand" class="history-expand" style="display:none;">
                 <div style="margin: 12px 0; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                  <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Run Date & Time:</div>
+                  <div style="font-size:0.85rem;color:var(--text-bright);margin-bottom:12px;">${date} at ${time}</div>
+                  
+                  <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">100-Piece Drops:</div>
+                  <div style="font-size:0.85rem;color:var(--gold);font-weight:600;margin-bottom:12px;">${hundredPieceCount} type${hundredPieceCount === 1 ? '' : 's'} of 100-piece currency</div>
+                  
                   <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Members:</div>
                   <div style="font-size:0.85rem;color:var(--text-bright);margin-bottom:12px;">${playerNames}</div>
                   
