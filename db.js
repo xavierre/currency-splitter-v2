@@ -39,8 +39,6 @@ async function saveDynamisRun(runData) {
 
 async function getRunHistory() {
   try {
-    const user = getCurrentUser();
-    if (!user) return [];
 
     const { data, error } = await supabaseClient
       .from('runs')
@@ -78,8 +76,6 @@ async function deleteRunFromDB(runId) {
 
 async function getAnalytics() {
   try {
-    const user = getCurrentUser();
-    if (!user) return null;
 
     const { data: runs, error } = await supabaseClient
       .from('runs')

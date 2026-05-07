@@ -822,22 +822,25 @@ function deleteRun(id) {
 
 function renderHistory() {
   const list = document.getElementById('history-list');
-  const history = loadHistory();
+  const history = loadHistory().slice(0, 5);
   if (history.length === 0) {
     list.innerHTML = '<div class="history-empty">No runs saved yet. Calculate a distribution and click Save Run.</div>';
     return;
   }
-  list.innerHTML = history.map(run => {
-    const summary = run.cData.filter(c => c.perP > 0)
-      .map(c => `${c.perP}× ${c.name.split(' ').pop()}`).join(', ');
-    return `<div class="history-item" onclick="loadRun(${run.id})">
-      <div>
-        <div><span class="zone-tag">${escapeHtml(run.zoneName)}</span> — ${run.playerNames.length} players</div>
-        <div class="meta">${escapeHtml(run.date)} &nbsp;·&nbsp; ${summary || 'no currency'} &nbsp;·&nbsp; fee: ${run.feeEach.toLocaleString()} gil/player</div>
-      </div>
-      <button class="history-del" onclick="event.stopPropagation();deleteRun(${run.id})" title="Delete">✕</button>
-    </div>`;
-  }).join('');
+  list.innerHTML = `
+    <table class="history-table">
+      <thead><tr><th>Date</th><th>Zone</th><th>Total Currency</th></tr></thead>
+      <tbody>${history.map(run => {
+        const date = escapeHtml(run.date.split(',')[0]);
+        const zone = escapeHtml(run.zoneName);
+        const total = run.cData.reduce((s, c) => s + (c.total || 0), 0);
+        return `<tr onclick="loadRun(${run.id})" style="cursor:pointer;" title="Click to load run">
+          <td>${date}</td>
+          <td>${zone}</td>
+          <td>${total.toLocaleString()}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
 }
 
 function loadRun(id) {
@@ -877,6 +880,14 @@ async function init() {
     window.location.href = 'login.html';
     return;
   }
+
+  const userEl = document.getElementById('header-user');
+  if (userEl) {
+    const username = getCurrentUser()?.email?.split('@')[0] || '';
+    userEl.textContent = '👤 ' + username;
+    userEl.style.display = '';
+  }
+
   await loadDefaultMembers();
   renderInstanceBar();
   renderCurrencyGrid();
