@@ -36,7 +36,7 @@ async function saveDynamisRun(runData) {
   }
 }
 
-async function getRunHistory(limit = 100) {
+async function getRunHistory() {
   try {
     const user = getCurrentUser();
     if (!user) return [];
@@ -44,8 +44,7 @@ async function getRunHistory(limit = 100) {
     const { data, error } = await supabaseClient
       .from('runs')
       .select('*')
-      .order('date', { ascending: false })
-      .limit(limit);
+      .order('date', { ascending: false });
 
     if (error) throw error;
     return data || [];
@@ -99,7 +98,6 @@ async function getAnalytics() {
 
     if (error || !runs) return null;
 
-    const BASE_FEE = 1000000;
     const stats = {
       totalRuns: runs.length,
       totalSales: 0,
@@ -291,32 +289,39 @@ async function getGuestHistory() {
 
 async function updateGuestHistory(guestNames) {
   try {
-    for (const name of guestNames) {
-      if (!name || !name.trim()) continue;
+    const names = guestNames.filter(n => n?.trim());
+    if (names.length === 0) return;
 
-      // Check if guest exists
-      const { data: existing } = await supabaseClient
-        .from('guest_history')
-        .select('*')
-        .eq('name', name)
-        .single();
+    const now = new Date().toISOString();
 
-      if (existing) {
-        // Update count and last_appeared
-        await supabaseClient
+    // Fetch all matching rows in one query
+    const { data: existing } = await supabaseClient
+      .from('guest_history')
+      .select('id, name, times_appeared')
+      .in('name', names);
+
+    const existingMap = Object.fromEntries((existing || []).map(r => [r.name, r]));
+    const toUpdate = names.filter(n => existingMap[n]);
+    const toInsert = names.filter(n => !existingMap[n]);
+
+    const ops = [];
+    if (toUpdate.length > 0) {
+      ops.push(...toUpdate.map(n =>
+        supabaseClient
           .from('guest_history')
-          .update({
-            times_appeared: existing.times_appeared + 1,
-            last_appeared: new Date().toISOString()
-          })
-          .eq('id', existing.id);
-      } else {
-        // Insert new guest
-        await supabaseClient
-          .from('guest_history')
-          .insert([{ name, times_appeared: 1 }]);
-      }
+          .update({ times_appeared: existingMap[n].times_appeared + 1, last_appeared: now })
+          .eq('id', existingMap[n].id)
+      ));
     }
+    if (toInsert.length > 0) {
+      ops.push(
+        supabaseClient
+          .from('guest_history')
+          .insert(toInsert.map(n => ({ name: n, times_appeared: 1, last_appeared: now })))
+      );
+    }
+
+    await Promise.all(ops);
   } catch (e) {
     console.error('Error updating guest history:', e);
   }

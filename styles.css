@@ -21,7 +21,7 @@
     --pill-bg: #161c36;
     --teal: #00d4c8;
     --font: 'DM Sans', sans-serif;
-    --mono: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -757,3 +757,47 @@
   /* make currency card relatively positioned so flag can anchor */
   #currency-card-title { position: relative; }
   .currency-card-wrap { position: relative; }
+
+  /* Shared utility — used across dashboard, manage, and other pages */
+  .logout-btn {
+    background: rgba(200,64,64,0.15);
+    border: 1px solid rgba(200,64,64,0.4);
+    border-radius: 6px;
+    color: var(--red);
+    font-family: var(--font);
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover {
+    background: rgba(200,64,64,0.3);
+    border-color: rgba(200,64,64,0.6);
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+  }
+
+  .error {
+    background: rgba(200,64,64,0.1);
+    border: 1px solid rgba(200,64,64,0.3);
+    border-radius: 6px;
+    color: var(--red);
+    padding: 16px;
+    margin: 20px;
+  }
+
+  .success {
+    background: rgba(46,204,128,0.1);
+    border: 1px solid rgba(46,204,128,0.3);
+    border-radius: 6px;
+    color: var(--green);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    display: none;
+  }

@@ -21,22 +21,6 @@
     font-weight: 700;
     color: var(--gold);
   }
-  .logout-btn {
-    background: rgba(200,64,64,0.15);
-    border: 1px solid rgba(200,64,64,0.4);
-    border-radius: 6px;
-    color: var(--red);
-    font-family: var(--font);
-    font-size: 0.76rem;
-    font-weight: 600;
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .logout-btn:hover {
-    background: rgba(200,64,64,0.3);
-    border-color: rgba(200,64,64,0.6);
-  }
 
   .manage-container {
     padding: 20px;
@@ -166,31 +150,6 @@
     color: var(--accent);
   }
 
-  .loading {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-dim);
-  }
-
-  .error {
-    background: rgba(200,64,64,0.1);
-    border: 1px solid rgba(200,64,64,0.3);
-    border-radius: 6px;
-    color: var(--red);
-    padding: 16px;
-    margin: 20px;
-  }
-
-  .success {
-    background: rgba(46,204,128,0.1);
-    border: 1px solid rgba(46,204,128,0.3);
-    border-radius: 6px;
-    color: var(--green);
-    padding: 10px 14px;
-    margin-bottom: 16px;
-    font-size: 0.85rem;
-    display: none;
-  }
 </style>
 </head>
 <body>
@@ -206,7 +165,7 @@
 
 <a href="index.html" class="back-btn">← Back to Calculator</a>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.46.1"></script>
 <script src="auth.js"></script>
 <script src="db.js"></script>
 <script>

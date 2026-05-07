@@ -22,22 +22,6 @@
     color: var(--gold);
     text-shadow: 0 0 20px rgba(240,188,46,0.4);
   }
-  .logout-btn {
-    background: rgba(200,64,64,0.15);
-    border: 1px solid rgba(200,64,64,0.4);
-    border-radius: 6px;
-    color: var(--red);
-    font-family: var(--font);
-    font-size: 0.76rem;
-    font-weight: 600;
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .logout-btn:hover {
-    background: rgba(200,64,64,0.3);
-    border-color: rgba(200,64,64,0.6);
-  }
  
   .dashboard-container {
     display: grid;
@@ -194,20 +178,6 @@
     margin-top: 4px;
   }
  
-  .loading {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-dim);
-  }
- 
-  .error {
-    background: rgba(200,64,64,0.1);
-    border: 1px solid rgba(200,64,64,0.3);
-    border-radius: 6px;
-    color: var(--red);
-    padding: 16px;
-    margin: 20px;
-  }
  
   .back-btn {
     display: inline-flex;
@@ -244,10 +214,19 @@
  
 <a href="index.html" class="back-btn">← Back to Calculator</a>
  
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.46.1"></script>
 <script src="auth.js"></script>
 <script src="db.js"></script>
 <script>
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   async function loadDashboard() {
     const container = document.getElementById('dashboard-container');
     
@@ -406,7 +385,7 @@
                              (c.name || '').toLowerCase().includes('silver') ? 'silver' :
                              (c.name || '').toLowerCase().includes('shell') ? 'shell' : '');
             return `<div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;margin:4px 0;">
-              <span class="coin-chip ${chipClass}">${c.name}</span>
+              <span class="coin-chip ${escapeHtml(chipClass)}">${escapeHtml(c.name)}</span>
               <span style="color:var(--text-dim);">:</span> ${c.perP || 0} per player
             </div>`;
           }).join('');
@@ -417,7 +396,7 @@
               : Array.isArray(lr.wins)
                 ? lr.wins
                 : [];
-            return `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--gold);">${lr.name}:</span> ${winners.join(', ') || 'nothing'}</div>`;
+            return `<div style="font-size:0.8rem;margin:4px 0;"><span style="color:var(--gold);">${escapeHtml(lr.name)}:</span> ${winners.map(escapeHtml).join(', ') || 'nothing'}</div>`;
           }).join('');
           
           historyHtml += `
@@ -428,7 +407,7 @@
                   <div class="history-summary-value" style="font-size:0.75rem;color:var(--text-dim);">${time}</div>
                 </div>
                 <div class="history-summary-item">
-                  <div class="history-summary-value">${run.zone_name}</div>
+                  <div class="history-summary-value">${escapeHtml(run.zone_name)}</div>
                 </div>
                 <div class="history-summary-item">
                   <div class="history-summary-value">${totalPlayers}</div>
@@ -449,7 +428,7 @@
                   <div style="font-size:0.85rem;color:var(--gold);font-weight:600;margin-bottom:12px;">${hundredPieceCount} type${hundredPieceCount === 1 ? '' : 's'} of 100-piece currency</div>
                   
                   <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Members:</div>
-                  <div style="font-size:0.85rem;color:var(--text-bright);margin-bottom:12px;">${playerNames}</div>
+                  <div style="font-size:0.85rem;color:var(--text-bright);margin-bottom:12px;">${escapeHtml(playerNames)}</div>
                   
                   <div style="font-size:0.8rem;color:var(--text-dim);margin-bottom:8px;font-weight:600;">Currency Distribution:</div>
                   ${currencyHtml || '<div style="color:var(--text-dim);">No currency data</div>'}

@@ -150,7 +150,7 @@ function renderGuestPlayers() {
   
   container.innerHTML = guestPlayers.map((guest, i) => `
     <div class="guest-item">
-      <input type="text" class="guest-input" value="${guest}" 
+      <input type="text" class="guest-input" value="${escapeHtml(guest)}"
              onchange="guestPlayers[${i}] = this.value; updatePlayersList();"
              placeholder="Player name">
       <button class="guest-remove-btn" onclick="removeGuestPlayer(${i})">✕</button>
@@ -498,7 +498,7 @@ function renderPlayerBreakdown(run) {
     }
 
     return `<tr>
-      <td class="player-name">${playerName}</td>
+      <td class="player-name">${escapeHtml(playerName)}</td>
       <td style="line-height:2;">${lines||'—'}</td>
       <td style="color:${feeColor};font-family:var(--mono);font-size:0.86rem;">${run.feeEach.toLocaleString()} gil</td>
       ${hasPrice?`<td style="color:${netColor};font-family:var(--mono);font-size:0.86rem;">${run.netGil.toLocaleString()} gil</td>`:''}
@@ -518,7 +518,7 @@ function renderLotteryPools() {
       <div class="lottery-players" id="pool-players-${pi}">
         ${players.map((p,i)=>`
           <div class="lottery-player-chip selected" id="chip-${pi}-${i}" onclick="togglePoolPlayer(${pi},${i})">
-            ${p||'(unnamed)'}
+            ${escapeHtml(p||'(unnamed)')}
           </div>`).join('')}
       </div>
     </div>`).join('');
@@ -560,6 +560,8 @@ function drawLottery() {
   const anyEligible = lotteryPools.some(p => p.selected.size > 0);
   if (!anyEligible) { alert('Select at least one player in a pool.'); return; }
 
+  if (lotteryIntervalId) { clearInterval(lotteryIntervalId); lotteryIntervalId = null; }
+
   // Animate all chips first
   lotteryPools.forEach((pool, pi) => {
     [...pool.selected].forEach(i => {
@@ -569,7 +571,7 @@ function drawLottery() {
   });
 
   let flashes = 0;
-  const interval = setInterval(() => {
+  lotteryIntervalId = setInterval(() => {
     lotteryPools.forEach((pool, pi) => {
       [...pool.selected].forEach(i => {
         const c = document.getElementById(`chip-${pi}-${i}`);
@@ -578,7 +580,8 @@ function drawLottery() {
     });
     flashes++;
     if (flashes > 12) {
-      clearInterval(interval);
+      clearInterval(lotteryIntervalId);
+      lotteryIntervalId = null;
 
       // Sort pools by value priority: shell first, silver/bronze second, byne last
       const TYPE_PRIORITY = { shell: 0, silver: 1, byne: 2 };
@@ -590,8 +593,10 @@ function drawLottery() {
       const eligibleSet = new Set();
       lotteryPools.forEach(pool => pool.selected.forEach(i => eligibleSet.add(i)));
       const baseOrder = [...eligibleSet];
+      const rng = new Uint32Array(baseOrder.length);
+      crypto.getRandomValues(rng);
       for (let i = baseOrder.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = rng[i] % (i + 1);
         [baseOrder[i], baseOrder[j]] = [baseOrder[j], baseOrder[i]];
       }
 
@@ -689,6 +694,7 @@ function drawLottery() {
 
 // === DISCORD SUMMARY ===
 let lastRunData = null;
+let lotteryIntervalId = null;
 
 function buildDiscordText(run) {
   const { zoneName, date, playerNames, cData, feeEach, netGil, hasPrice, leftovers, lotteryResults } = run;
@@ -826,8 +832,8 @@ function renderHistory() {
       .map(c => `${c.perP}× ${c.name.split(' ').pop()}`).join(', ');
     return `<div class="history-item" onclick="loadRun(${run.id})">
       <div>
-        <div><span class="zone-tag">${run.zoneName}</span> — ${run.playerNames.length} players</div>
-        <div class="meta">${run.date} &nbsp;·&nbsp; ${summary || 'no currency'} &nbsp;·&nbsp; fee: ${run.feeEach.toLocaleString()} gil/player</div>
+        <div><span class="zone-tag">${escapeHtml(run.zoneName)}</span> — ${run.playerNames.length} players</div>
+        <div class="meta">${escapeHtml(run.date)} &nbsp;·&nbsp; ${summary || 'no currency'} &nbsp;·&nbsp; fee: ${run.feeEach.toLocaleString()} gil/player</div>
       </div>
       <button class="history-del" onclick="event.stopPropagation();deleteRun(${run.id})" title="Delete">✕</button>
     </div>`;
@@ -857,7 +863,7 @@ function loadRun(id) {
   document.getElementById('dist-table-body').innerHTML = run.playerNames.map(p => {
     const lines = run.cData.filter(c => c.perP > 0)
       .map(c => `<span style="white-space:nowrap;">${c.perP} × ${coinChip(c.name,c.type)}</span>`).join('&ensp;');
-    return `<tr><td class="player-name">${p}</td><td style="line-height:2;">${lines||'—'}</td>
+    return `<tr><td class="player-name">${escapeHtml(p)}</td><td style="line-height:2;">${lines||'—'}</td>
       <td style="color:${feeColor};font-family:var(--mono);font-size:0.86rem;">${run.feeEach.toLocaleString()} gil</td>
       ${run.hasPrice ? `<td style="color:${netColor};font-family:var(--mono);font-size:0.86rem;">${run.netGil.toLocaleString()} gil</td>` : ''}</tr>`;
   }).join('');
@@ -866,6 +872,10 @@ function loadRun(id) {
 }
 
 async function init() {
+  if (!isLoggedIn()) {
+    window.location.href = 'login.html';
+    return;
+  }
   await loadDefaultMembers();
   renderInstanceBar();
   renderCurrencyGrid();
