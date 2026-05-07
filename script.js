@@ -872,6 +872,7 @@ function loadRun(id) {
 }
 
 async function init() {
+  await _authReady;
   if (!isLoggedIn()) {
     window.location.href = 'login.html';
     return;

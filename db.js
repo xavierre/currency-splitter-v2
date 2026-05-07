@@ -11,6 +11,7 @@ async function saveDynamisRun(runData) {
     const { data, error } = await supabaseClient
       .from('runs')
       .insert([{
+        user_id: user.id,
         date: new Date().toISOString(),
         zone_name: runData.zoneName,
         default_members: runData.defaultMembers || [],
@@ -59,23 +60,11 @@ async function deleteRunFromDB(runId) {
     const user = getCurrentUser();
     if (!user) return false;
 
-    // First check if the run belongs to the current user
-    const { data: run, error: fetchError } = await supabaseClient
-      .from('runs')
-      .select('id')
-      .eq('id', runId)
-      .single();
-
-    if (fetchError || !run) {
-      console.error('Run not found or access denied');
-      return false;
-    }
-
-    // Delete the run
     const { error } = await supabaseClient
       .from('runs')
       .delete()
-      .eq('id', runId);
+      .eq('id', runId)
+      .eq('user_id', user.id);
 
     if (error) throw error;
     return true;
@@ -226,7 +215,7 @@ async function addDefaultMember(name) {
 
     const { data, error } = await supabaseClient
       .from('default_members')
-      .insert([{ name }])
+      .insert([{ user_id: user.id, name }])
       .select();
 
     if (error) {
@@ -255,7 +244,8 @@ async function deleteDefaultMember(memberId) {
     const { error } = await supabaseClient
       .from('default_members')
       .delete()
-      .eq('id', memberId);
+      .eq('id', memberId)
+      .eq('user_id', user.id);
 
     if (error) throw error;
 
@@ -289,6 +279,7 @@ async function getGuestHistory() {
 
 async function updateGuestHistory(guestNames) {
   try {
+    const user = getCurrentUser();
     const names = guestNames.filter(n => n?.trim());
     if (names.length === 0) return;
 
@@ -317,7 +308,7 @@ async function updateGuestHistory(guestNames) {
       ops.push(
         supabaseClient
           .from('guest_history')
-          .insert(toInsert.map(n => ({ name: n, times_appeared: 1, last_appeared: now })))
+          .insert(toInsert.map(n => ({ user_id: user?.id, name: n, times_appeared: 1, last_appeared: now })))
       );
     }
 

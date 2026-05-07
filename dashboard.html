@@ -228,9 +228,9 @@
   }
 
   async function loadDashboard() {
+    await _authReady;
     const container = document.getElementById('dashboard-container');
-    
-    // Check if logged in
+
     if (!isLoggedIn()) {
       window.location.href = 'login.html';
       return;
@@ -459,8 +459,8 @@
     }
   }
  
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     window.location.href = 'login.html';
   }
 

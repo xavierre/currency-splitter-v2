@@ -5,32 +5,36 @@ const SUPABASE_ANON_KEY = 'sb_publishable_SrpGLdaA-3Q-MwYdaqo6wg_qKlBNwgN';
 const supabaseGlobal = typeof supabase !== 'undefined' ? supabase : window.supabase;
 const supabaseClient = supabaseGlobal.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ============ SESSION STATE ============
+let _currentUser = null;
+
+// Resolves once the initial session is known — await _authReady before calling isLoggedIn()
+const _authReady = (async () => {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  _currentUser = session?.user ?? null;
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    _currentUser = session?.user ?? null;
+  });
+})();
+
+function getCurrentUser() { return _currentUser; }
+function isLoggedIn()     { return _currentUser !== null; }
+
 // ============ AUTH FUNCTIONS ============
+const AUTH_DOMAIN = '@dynamissplit.app';
+const toEmail = username => username.toLowerCase().trim() + AUTH_DOMAIN;
+
 async function signup(username, password) {
   try {
-    // Hash password on client (simple - in production use proper bcrypt)
-    const passwordHash = await hashPassword(password);
-
-    // Insert user
-    const { data, error } = await supabaseClient
-      .from('users')
-      .insert([{ username, password_hash: passwordHash }])
-      .select();
-
-    if (error) {
-      if (error.code === '23505') {
-        return { success: false, error: 'Username already exists' };
-      }
-      throw error;
-    }
-
-    // Store in localStorage
-    localStorage.setItem('current_user', JSON.stringify({ 
-      id: data[0].id, 
-      username: username 
-    }));
-
-    return { success: true, user: data[0] };
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: toEmail(username),
+      password,
+      options: { data: { username } }
+    });
+    if (error) return { success: false, error: error.message };
+    _currentUser = data.user;
+    return { success: true, user: data.user };
   } catch (e) {
     console.error('Signup error:', e);
     return { success: false, error: e.message };
@@ -39,56 +43,20 @@ async function signup(username, password) {
 
 async function login(username, password) {
   try {
-    const passwordHash = await hashPassword(password);
-
-    // Find user
-    const { data, error } = await supabaseClient
-      .from('users')
-      .select('*')
-      .eq('username', username)
-      .single();
-
-    if (error || !data) {
-      return { success: false, error: 'User not found' };
-    }
-
-    // Check password
-    if (data.password_hash !== passwordHash) {
-      return { success: false, error: 'Invalid password' };
-    }
-
-    // Store in localStorage
-    localStorage.setItem('current_user', JSON.stringify({ 
-      id: data.id, 
-      username: username 
-    }));
-
-    return { success: true, user: data };
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: toEmail(username),
+      password
+    });
+    if (error) return { success: false, error: error.message };
+    _currentUser = data.user;
+    return { success: true, user: data.user };
   } catch (e) {
     console.error('Login error:', e);
     return { success: false, error: e.message };
   }
 }
 
-function logout() {
-  localStorage.removeItem('current_user');
-}
-
-function getCurrentUser() {
-  const stored = localStorage.getItem('current_user');
-  return stored ? JSON.parse(stored) : null;
-}
-
-function isLoggedIn() {
-  return getCurrentUser() !== null;
-}
-
-// Simple password hash (NOT for production - use proper bcrypt)
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
+async function logout() {
+  await supabaseClient.auth.signOut();
+  _currentUser = null;
 }

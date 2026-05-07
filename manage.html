@@ -170,9 +170,9 @@
 <script src="db.js"></script>
 <script>
   async function loadManagePage() {
+    await _authReady;
     const container = document.getElementById('manage-container');
-    
-    // Check if logged in
+
     if (!isLoggedIn()) {
       window.location.href = 'login.html';
       return;
@@ -257,8 +257,8 @@
     setTimeout(() => el.style.display = 'none', 2500);
   }
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     window.location.href = 'login.html';
   }
 

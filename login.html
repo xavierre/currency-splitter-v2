@@ -137,12 +137,12 @@
     <form id="auth-form" onsubmit="handleAuth(event)">
       <div class="form-group">
         <label>Username</label>
-        <input type="text" id="username" required placeholder="your username">
+        <input type="text" id="email" required placeholder="your username" autocomplete="username">
       </div>
 
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" required placeholder="••••••••">
+        <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
       </div>
 
       <button type="submit" class="auth-btn" id="auth-submit">Sign In</button>
@@ -181,30 +181,19 @@
 
   async function handleAuth(e) {
     e.preventDefault();
-    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const errorEl = document.getElementById('auth-error');
     const submitBtn = document.getElementById('auth-submit');
-
-    if (!username || !password) {
-      errorEl.textContent = 'Please fill in all fields';
-      errorEl.style.display = 'block';
-      return;
-    }
 
     submitBtn.disabled = true;
     errorEl.style.display = 'none';
 
     try {
-      let result;
-      if (isSignupMode) {
-        result = await signup(username, password);
-      } else {
-        result = await login(username, password);
-      }
+      const result = isSignupMode ? await signup(email, password) : await login(email, password);
 
       if (result.success) {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'index.html';
       } else {
         errorEl.textContent = result.error;
         errorEl.style.display = 'block';
@@ -217,10 +206,10 @@
     }
   }
 
-  // If already logged in, redirect to dashboard
-  if (isLoggedIn()) {
-    window.location.href = 'dashboard.html';
-  }
+  // If already logged in, redirect to main app
+  _authReady.then(() => {
+    if (isLoggedIn()) window.location.href = 'index.html';
+  });
 </script>
 
 </body>
