@@ -22,7 +22,7 @@ function getCurrentUser() { return _currentUser; }
 function isLoggedIn()     { return _currentUser !== null; }
 
 // ============ AUTH FUNCTIONS ============
-const AUTH_DOMAIN = '@dynamissplit.app';
+const AUTH_DOMAIN = '@dynamissplit.com';
 const toEmail = username => username.toLowerCase().trim() + AUTH_DOMAIN;
 
 async function signup(username, password) {
