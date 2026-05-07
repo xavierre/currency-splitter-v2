@@ -1,0 +1,5 @@
+{
+  "buildCommand": "echo 'Static site - no build needed'",
+  "outputDirectory": ".",
+  "devCommand": "python -m http.server 8000"
+}
