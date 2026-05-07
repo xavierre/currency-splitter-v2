@@ -46,7 +46,7 @@ CREATE POLICY "own_guest_history"
 --
 -- Run this AFTER you have created your new account via the
 -- login page. The app stores usernames internally as
--- username@dynamissplit.app — so replace 'xavierre' below
+-- username@dynamissplit.com — so replace 'xavierre' below
 -- with your actual username (lowercase).
 --
 -- This assigns all orphaned rows (user_id IS NULL) to your
@@ -54,15 +54,15 @@ CREATE POLICY "own_guest_history"
 -- ============================================================
 
 UPDATE runs
-  SET user_id = (SELECT id FROM auth.users WHERE email = 'xavierre@dynamissplit.app')
+  SET user_id = (SELECT id FROM auth.users WHERE email = 'xavierre@dynamissplit.com')
   WHERE user_id IS NULL;
 
 UPDATE default_members
-  SET user_id = (SELECT id FROM auth.users WHERE email = 'xavierre@dynamissplit.app')
+  SET user_id = (SELECT id FROM auth.users WHERE email = 'xavierre@dynamissplit.com')
   WHERE user_id IS NULL;
 
 UPDATE guest_history
-  SET user_id = (SELECT id FROM auth.users WHERE email = 'xavierre@dynamissplit.app')
+  SET user_id = (SELECT id FROM auth.users WHERE email = 'xavierre@dynamissplit.com')
   WHERE user_id IS NULL;
 
 -- ============================================================
